@@ -1,63 +1,80 @@
 // --- Views/DiscardPileView.cs ---
 using UnityEngine;
 using Sirenix.OdinInspector;
-using com.hyminix.game.ojyx.Controllers; //Pour accéder au controller
+using com.hyminix.game.ojyx.Controllers;
+using com.hyminix.game.ojyx.Models;
+using System.Collections.Generic;
+
 namespace com.hyminix.game.ojyx.Views
 {
         public class DiscardPileView : MonoBehaviour
         {
-                [SerializeField] private GameObject cardSlotPrefab; //Prefab du slot
-                [SerializeField] public Transform discardCenter; //Le centre de la défausse
-                //[ShowInInspector, ReadOnly] private CardSlotController discardSlot; //Référence au controller -> Plus besoin du readOnly
-                public CardSlotController discardSlot { get; private set; } // On expose publiquement le controller du slot.  DrawChoiceState en a besoin.
+                [Title("Conteneur de la défausse (pile)")]
+                [SerializeField] private Transform discardPileContainer;
+                [SerializeField] private float offsetZ = 0.02f;
 
-                //Initialisation
-                private void Start()
-                {
-                        GenerateDiscardSlot(); //On genere le slot
-                }
+                [Title("Référence Modèle")]
+                [ReadOnly, SerializeField] public DiscardPile discardPileModel;
 
-                [Button("Générer le Slot de Défausse")]
-                public void GenerateDiscardSlot()
+                // Ajoute visuellement une carte au sommet de la pile
+                public void AddCardToDiscardPile(CardController cardController)
                 {
-                        //Si il existe, on le détruit
-                        if (discardSlot != null) Destroy(discardSlot.gameObject);
-                        GameObject slotObject = Instantiate(cardSlotPrefab, discardCenter.position, Quaternion.identity, transform); //On instancie
-                        discardSlot = slotObject.GetComponent<CardSlotController>();
-                        discardSlot.Initialize(0, 0); // Initialise le slot (les coordonnées n'ont pas d'importance ici).
-                }
-
-                //Fonction pour placer la carte dans la défausse
-                public void PlaceCardInDiscard(CardController card)
-                {
-                        if (discardSlot.RemoveCard() != null) //Si il y a deja une carte
+                        if (discardPileModel == null)
                         {
-                                // discardSlot.RemoveCard(); //On la supprime  -> Plus besoin car on remplace par la nouvelle de toute façon
+                                Debug.LogError("DiscardPileView: discardPileModel n'est pas assigné !");
+                                return;
                         }
-                        discardSlot.PlaceCard(card); //On place la nouvelle
+
+                        discardPileModel.AddCard(cardController.Card);
+                        cardController.transform.SetParent(discardPileContainer);
+                        int count = discardPileModel.cards.Count;
+                        cardController.transform.localPosition = new Vector3(0, 0, -offsetZ * (count - 1));
+                        cardController.transform.localRotation = Quaternion.identity;
+                        Debug.Log($"DiscardPileView: Ajout de la carte {cardController.Card.Data.value} en position {count} de la pile.");
                 }
 
-                //Fonction pour piocher dans la défausse
-                public CardController DrawFromDiscard()
+                // Retire la carte du dessus (modèle et vue)
+                public CardController DrawTopCardController()
                 {
-                        //Si il y a une carte
-                        return discardSlot.RemoveCard();
-                }
-
-                //Fonction pour mettre en surbrillance
-                public void SetHighlight(bool active)
-                {
-                        if (discardSlot != null)
+                        if (discardPileModel == null)
                         {
-                                discardSlot.SetHighlight(active); //Appel la fonction du controlleur
+                                Debug.LogError("DiscardPileView: discardPileModel n'est pas assigné !");
+                                return null;
                         }
+                        if (discardPileModel.cards.Count == 0)
+                        {
+                                Debug.LogWarning("DiscardPileView: La défausse est vide !");
+                                return null;
+                        }
+
+                        Card topCard = discardPileModel.DrawCard();
+                        CardController topCardController = GetTopCardController();
+                        if (topCardController == null)
+                        {
+                                Debug.LogError("DiscardPileView: Impossible de trouver le CardController du dessus !");
+                                return null;
+                        }
+                        topCardController.transform.SetParent(null);
+                        topCardController.Initialize(topCard);
+                        Debug.Log($"DiscardPileView: Carte {topCard.Data.value} retirée de la défausse.");
+                        return topCardController;
                 }
 
-                //Fonction pour vider la défausse
+                // IMPORTANT : on rend cette méthode publique pour l'accès depuis les états
+                public CardController GetTopCardController()
+                {
+                        int lastIndex = discardPileContainer.childCount - 1;
+                        if (lastIndex < 0) return null;
+                        return discardPileContainer.GetChild(lastIndex).GetComponent<CardController>();
+                }
+
+                [Button("Clear Discard Pile")]
                 public void Clear()
                 {
-                        discardSlot.RemoveCard();
+                        for (int i = discardPileContainer.childCount - 1; i >= 0; i--)
+                        {
+                                Destroy(discardPileContainer.GetChild(i).gameObject);
+                        }
                 }
         }
 }
-

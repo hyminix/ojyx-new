@@ -2,15 +2,15 @@
 using UnityEngine;
 using com.hyminix.game.ojyx.Controllers;
 using com.hyminix.game.ojyx.Managers;
+using UnityEngine.EventSystems;
 
 namespace com.hyminix.game.ojyx.States
 {
-    public class RevealCardState : IGameState, ICardClickHandler
+    public class RevealCardState : IGameState
     {
         public void EnterState(GameManager manager)
         {
             Debug.Log("RevealCardState: Veuillez révéler une carte face cachée.");
-            SubscribeToEvents(manager);
         }
 
         public void ExecuteState(GameManager manager)
@@ -19,10 +19,9 @@ namespace com.hyminix.game.ojyx.States
 
         public void ExitState(GameManager manager)
         {
-            UnsubscribeFromEvents(manager);
         }
 
-        public void HandleCardClick(GameManager manager, CardController cardController)
+        public void HandleCardClick(GameManager manager, CardController cardController, PointerEventData eventData)
         {
             // Vérifie si la carte cliquée appartient au joueur actuel *ET* si elle est face cachée.
             if (cardController.Card.IsFaceUp || !IsCardBelongToPlayer(manager.CurrentPlayer, cardController.Card))
@@ -46,43 +45,11 @@ namespace com.hyminix.game.ojyx.States
                     //Si la carte du slot correspond a la carte cliqué
                     if (slot.cardSlot.card == card)
                     {
-                        return true; //On retourne true
+                        return true; //On retourne
                     }
                 }
             }
             return false;
-        }
-
-
-        private void SubscribeToEvents(GameManager manager)
-        {
-            // OPTIMISATION:  On s'abonne SEULEMENT aux cartes du joueur courant.
-            foreach (var slot in manager.CurrentPlayer.PlayerBoardController.playerBoardView.cardSlots)
-            {
-                if (slot.cardSlot.card != null) // S'il y a une carte
-                {
-                    CardController cardController = slot.GetComponentInChildren<CardController>();
-                    if (cardController != null)
-                    {
-                        cardController.OnCardClicked += manager.OnCardClicked;
-                    }
-                }
-            }
-        }
-
-        private void UnsubscribeFromEvents(GameManager manager)
-        {
-            foreach (var slot in manager.CurrentPlayer.PlayerBoardController.playerBoardView.cardSlots)
-            {
-                if (slot.cardSlot.card != null) // S'il y a une carte
-                {
-                    CardController cardController = slot.GetComponentInChildren<CardController>();
-                    if (cardController != null)
-                    {
-                        cardController.OnCardClicked -= manager.OnCardClicked;
-                    }
-                }
-            }
         }
     }
 }

@@ -14,6 +14,7 @@ namespace com.hyminix.game.ojyx.Models
         {
             this.columns = columns;
             this.rows = rows;
+            cardSlots = new List<CardSlot>(); // Initialise la liste
             Initialize(); // Initialise le plateau lors de la construction.
         }
         private void Initialize()

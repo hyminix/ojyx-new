@@ -1,11 +1,10 @@
-// --- Controllers/DeckController.cs --- (CORRIGÉ : DrawFromDeck crée toujours un nouveau CardController)
-
 using System.Collections.Generic;
 using UnityEngine;
 using Sirenix.OdinInspector;
 using com.hyminix.game.ojyx.Models;
 using com.hyminix.game.ojyx.Views;
 using com.hyminix.game.ojyx.Data;
+using DG.Tweening;
 
 namespace com.hyminix.game.ojyx.Controllers
 {
@@ -21,9 +20,11 @@ namespace com.hyminix.game.ojyx.Controllers
         [Title("Composants")]
         [SerializeField, ReadOnly] private Deck deck;
         [SerializeField, ReadOnly] private DeckView deckView;
+
         [SerializeField, ReadOnly] private DiscardPile discardPile;
         public DiscardPile DiscardPile => discardPile;
-        [SerializeField] public DiscardPileView discardPileView;
+
+        [SerializeField] public DiscardPileView discardPileView; // Vue de la défausse
 
         public delegate void CardDrawAction(Card card);
         public static event CardDrawAction OnCardDrawnFromDeck;
@@ -32,15 +33,19 @@ namespace com.hyminix.game.ojyx.Controllers
         [ShowInInspector, ReadOnly]
         public List<CardController> deckCards = new List<CardController>(); // Garde la liste publique.
 
-        // Référence à la carte du dessus du deck.
-        private CardController currentTopCardController;
-
+        private CardController currentTopCardController; // Carte du dessus de la pioche (vue)
 
         private void Start()
         {
+            // Initialise le modèle de la défausse
             discardPile = new DiscardPile();
-        }
 
+            // IMPORTANT : On assigne le modèle de la défausse à la vue
+            if (discardPileView != null)
+            {
+                discardPileView.discardPileModel = discardPile;
+            }
+        }
 
         [Button("Initialiser le Deck")]
         public void InitializeDeck()
@@ -58,11 +63,11 @@ namespace com.hyminix.game.ojyx.Controllers
 
             if (deck.cards.Count > 0)
             {
-                ShowTopDeckCard(); // Affiche la carte du dessus.
+                ShowTopDeckCard(); // Affiche la carte du dessus
             }
         }
 
-        // --- DrawFromDeck : CORRIGÉ pour créer un NOUVEAU CardController ---
+        // Pioche une carte depuis la pioche (deck)
         public CardController DrawFromDeck()
         {
             Card drawnCard = deck.DrawCard();
@@ -77,93 +82,101 @@ namespace com.hyminix.game.ojyx.Controllers
                 }
             }
 
-            // Crée *toujours* un nouveau CardController.
             CardController drawnCardController = CreateCardController(drawnCard);
-
-
             OnCardDrawnFromDeck?.Invoke(drawnCard);
 
-            // Affiche la carte suivante (si elle existe).
-            ShowNextCard();  // Met à jour l'affichage de la pioche.
+            // Met à jour la pioche visuelle
+            ShowNextCard();
 
-            return drawnCardController; // Retourne le *nouveau* CardController.
+            return drawnCardController;
         }
-        // --- Fin de DrawFromDeck ---
 
-
+        // Défausse une carte directement (sans animation)
         public void DiscardCard(Card card)
         {
             if (card == null) return;
-
             discardPile.AddCard(card);
+
+            // Crée un nouveau CardController pour la vue
             CardController cardController = CreateCardController(card);
-            cardController.transform.position = discardPileView.discardCenter.position;
-            discardPileView.PlaceCardInDiscard(cardController);
+            // Place visuellement dans la défausse
+            discardPileView.AddCardToDiscardPile(cardController);
         }
 
+        // Défausse avec animation
+        public void DiscardCardWithAnimation(CardController cardController, float duration, Ease ease)
+        {
+            if (cardController == null) return;
+
+            Debug.Log("Mouvement de la carte (DiscardCardWithAnimation)");
+            cardController.Flip(); // On la flip pour la mettre face visible
+
+            // Animation de déplacement vers le centre de la défausse
+            cardController.transform.DOMove(discardPileView.transform.position, duration)
+                .SetEase(ease)
+                .OnComplete(() =>
+                {
+                    // On l'ajoute au modèle
+                    discardPile.AddCard(cardController.Card);
+                    // On l'ajoute à la vue de la défausse
+                    discardPileView.AddCardToDiscardPile(cardController);
+                });
+        }
+
+        // Pioche la carte du dessus de la défausse
         public CardController DrawFromDiscardPile()
         {
-            Card card = discardPile.DrawCard();
-            if (card == null)
+            // On récupère le topCardController dans la vue
+            CardController topCardController = discardPileView.DrawTopCardController();
+            if (topCardController == null)
             {
-                Debug.Log("La défausse est vide");
+                Debug.LogWarning("Impossible de piocher depuis la défausse (vide).");
                 return null;
             }
 
-            // TROUVER le CardController existant.
-            CardController cardController = discardPileView.discardSlot.GetComponentInChildren<CardController>();
-            if (cardController == null)
-            {
-                Debug.LogError("DrawFromDiscardPile: CardController not found in discard pile!"); // Cela ne devrait *JAMAIS* arriver.
-                return null; // Ou, potentiellement, créer un nouveau CardController ici, mais c'est un signe de problème ailleurs.
-            }
-
-            discardPileView.discardSlot.RemoveCard(); //Supprime la carte du model
-            cardController.Initialize(card); // Réinitialise avec la nouvelle carte (important si le CardController est réutilisé)
-            OnCardDrawnFromDiscard?.Invoke(card); // Gardez cet événement, il peut être utile.
-            return cardController; // Retourne le CardController *existant*.
+            // topCardController.Card a déjà été mis à jour dans la vue
+            OnCardDrawnFromDiscard?.Invoke(topCardController.Card);
+            return topCardController;
         }
 
-
+        // Remélange la défausse dans la pioche
         public void ReshuffleDiscardIntoDeck()
         {
             Card topCard = discardPile.TopCard;
             List<Card> reshuffledCards = discardPile.GetCardsForReshuffle();
             discardPile.Clear();
             discardPileView.Clear();
+
             deck.AddCards(reshuffledCards);
             deck.Shuffle();
 
-
-            // On détruit l'ancienne carte visible du deck.
+            // On détruit l'ancienne carte visible du deck
             if (currentTopCardController != null)
             {
                 Destroy(currentTopCardController.gameObject);
-                currentTopCardController = null; // Important de réinitialiser.
+                currentTopCardController = null;
             }
 
-            // Mise à jour importante : Vider la liste deckCards *AVANT* de la reconstruire.
             deckCards.Clear();
 
-            // Affiche la nouvelle carte du dessus.
+            // Affiche la nouvelle carte du dessus
             if (deck.cards.Count > 0)
             {
-                ShowTopDeckCard(); // Réutilise la méthode.
+                ShowTopDeckCard();
             }
 
-
+            // On remet la topCard dans la défausse
             if (topCard != null)
             {
                 discardPile.AddCard(topCard);
                 CardController cardController = CreateCardController(topCard);
-                cardController.transform.position = discardPileView.discardCenter.position;
-                discardPileView.PlaceCardInDiscard(cardController);
+                discardPileView.AddCardToDiscardPile(cardController);
             }
 
             Debug.Log("Deck reshuffled. Top card of discard pile remains.");
         }
 
-
+        // Instancie un CardController pour un Card donné
         public CardController CreateCardController(Card card)
         {
             GameObject cardObject = Instantiate(cardPrefab);
@@ -176,65 +189,58 @@ namespace com.hyminix.game.ojyx.Controllers
             return cardController;
         }
 
+        // Déplace la première carte de la pioche à la défausse (état DiscardFirstCardState)
         public void MoveCardFromDeckToDiscard()
         {
-            Card cardToDiscard = deck.DrawCard();
+            CardController cardToDiscard = DrawFromDeck();
             if (cardToDiscard != null)
             {
-                cardToDiscard.IsFaceUp = true;
-                DiscardCard(cardToDiscard);
+                DiscardCardWithAnimation(cardToDiscard, 0.5f, Ease.OutQuad);
             }
         }
 
-        // MODIFIÉ: ShowTopDeckCard crée la carte *une seule fois*.
+        // Affiche la carte du dessus de la pioche (visuellement)
         private void ShowTopDeckCard()
         {
-            if (deck.cards.Count > 0 && currentTopCardController == null) // Vérifie si la carte n'existe pas déjà
+            if (deck.cards.Count > 0 && currentTopCardController == null)
             {
-                Card topCard = deck.cards[0]; // Prend la première carte du *modèle*.
+                Card topCard = deck.cards[0];
                 currentTopCardController = CreateCardController(topCard);
                 currentTopCardController.transform.position = deckPosition.position;
                 currentTopCardController.transform.SetParent(deckPosition);
-                currentTopCardController.SetDraggable(false); // Par défaut, non-draggable.
-                deckCards.Add(currentTopCardController); // Ajoute à la liste (même si on n'en affiche qu'une).
+                deckCards.Add(currentTopCardController);
             }
         }
 
-        // MODIFIÉ: ShowNextCard ne crée plus de doublons, et gère le cas où il n'y a plus de carte suivante.
+        // Affiche la carte suivante (2e carte) de la pioche
         public void ShowNextCard()
         {
-            // D'abord, on supprime l'ancienne "prochaine carte" (s'il y en avait une).
             if (deckCards.Count > 1)
             {
                 Destroy(deckCards[1].gameObject);
                 deckCards.RemoveAt(1);
             }
 
-            // Ensuite, on affiche la nouvelle prochaine carte (s'il y en a une).
             if (deck.cards.Count > 1)
             {
-                Card nextCard = deck.cards[1]; // La *deuxième* carte du modèle.
+                Card nextCard = deck.cards[1];
                 CardController nextCardController = CreateCardController(nextCard);
-
-                // Positionne la carte *légèrement* en dessous de la carte du dessus.
-                float zOffset = 0.01f; // Reprend l'offset.  Ajuste au besoin.
+                float zOffset = 0.01f;
                 nextCardController.transform.position = deckPosition.position + new Vector3(0, 0, -zOffset);
                 nextCardController.transform.SetParent(deckPosition);
-                nextCardController.SetDraggable(false); // La carte suivante n'est pas draggable.
-                nextCardController.gameObject.SetActive(false); //On la desactive
-                deckCards.Insert(1, nextCardController); // L'insère à l'index 1, pour un ordre correct.
+                nextCardController.gameObject.SetActive(false);
+                deckCards.Insert(1, nextCardController);
             }
         }
 
-        // NOUVELLE MÉTHODE : Masque la carte suivante (après le drag).
-        public void HideNextCard()
+        // Masque la 2e carte
+        public void HideNextCard()
         {
             if (deckCards.Count > 1)
             {
-                Destroy(deckCards[1].gameObject); // Détruit la carte suivante (visuellement).
-                deckCards.RemoveAt(1);          // La supprime de la liste.
-            }
+                Destroy(deckCards[1].gameObject);
+                deckCards.RemoveAt(1);
+            }
         }
     }
 }
-

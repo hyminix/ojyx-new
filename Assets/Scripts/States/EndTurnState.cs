@@ -1,6 +1,8 @@
 // --- States/EndTurnState.cs --- (Complet)
 using UnityEngine;
 using com.hyminix.game.ojyx.Controllers;
+using com.hyminix.game.ojyx.Managers;
+using UnityEngine.EventSystems;
 
 namespace com.hyminix.game.ojyx.States
 {
@@ -15,6 +17,11 @@ namespace com.hyminix.game.ojyx.States
 
         public void ExecuteState(Managers.GameManager manager) { }
         public void ExitState(Managers.GameManager manager) { }
+
+        public void HandleCardClick(GameManager manager, CardController cardController, PointerEventData eventData)
+        {
+            throw new System.NotImplementedException();
+        }
 
         //Fonction pour vérifier si la manche est terminée
         private void CheckRoundEnd(Managers.GameManager manager)

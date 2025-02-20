@@ -1,9 +1,10 @@
-// --- Managers/GameManager.cs --- (Modifications pour ClickDetector et DrawFromDeck/Discard)
+// --- Managers/GameManager.cs --- (Gestion Centralisée des Clics)
 using System.Collections.Generic;
 using UnityEngine;
 using Sirenix.OdinInspector;
 using com.hyminix.game.ojyx.Controllers;
 using com.hyminix.game.ojyx.States;
+using UnityEngine.EventSystems;
 
 namespace com.hyminix.game.ojyx.Managers
 {
@@ -26,7 +27,6 @@ namespace com.hyminix.game.ojyx.Managers
         public int currentPlayerIndex = 0;
         public PlayerController CurrentPlayer => players[currentPlayerIndex];
 
-        // SUPPRIMÉ:  private List<ClickDetector> addedClickDetectors = new List<ClickDetector>();
 
         private void Awake()
         {
@@ -35,7 +35,8 @@ namespace com.hyminix.game.ojyx.Managers
             else
                 Destroy(gameObject);
 
-            deckController = FindObjectOfType<DeckController>();
+            // FindFirstObjectByType au lieu de FindObjectOfType
+            deckController = FindFirstObjectByType<DeckController>();
         }
 
         private void Start()
@@ -43,6 +44,22 @@ namespace com.hyminix.game.ojyx.Managers
             deckController.InitializeDeck();
             TransitionToState(new SetupState());
         }
+
+        // On utilise OnEnable et OnDisable pour gérer les abonnements aux événements.
+        // C'est plus propre et plus sûr que Start/ExitState.
+        private void OnEnable()
+        {
+            // Utilisation directe de GameEvents
+            GameEvents.OnCardSlotClicked += HandleCardSlotClicked;
+        }
+
+        private void OnDisable()
+        {
+            // Utilisation directe de GameEvents
+            GameEvents.OnCardSlotClicked -= HandleCardSlotClicked;
+        }
+
+
 
         private void Update()
         {
@@ -62,15 +79,21 @@ namespace com.hyminix.game.ojyx.Managers
             Debug.Log("Passage au joueur suivant : " + CurrentPlayer.playerID);
         }
 
+        // MODIFICATION :  Cette méthode reçoit maintenant un CardSlotController, pas un CardController.
+        private void HandleCardSlotClicked(CardSlotController slotController, PointerEventData eventData) // MODIFIÉ
+        {
+            Debug.Log("GameManager.HandleCardSlotClicked: Clic détecté!");
+            CardController cardController = slotController.GetComponentInChildren<CardController>();
+            currentState.HandleCardClick(this, cardController, eventData); // MODIFIÉ : Passe eventData
+        }
 
         public void DrawFromDeck()
         {
-            CardController drawnCard = deckController.DrawFromDeck(); //Pioche une carte et la stock
+            CardController drawnCard = deckController.DrawFromDeck();
             if (drawnCard != null)
             {
-                drawnCard.SetDraggable(true);
-                drawnCard.Flip(); // Montre la face *MAINTENANT*.
-                TransitionToState(new CardPlacementState(drawnCard));
+                drawnCard.Flip();
+                TransitionToState(new CardSelectedState(drawnCard));
             }
             else
             {
@@ -78,48 +101,30 @@ namespace com.hyminix.game.ojyx.Managers
             }
         }
 
-
         public void DrawFromDiscard()
         {
             CardController drawnCard = deckController.DrawFromDiscardPile();
             if (drawnCard != null)
             {
-                drawnCard.SetDraggable(true); // Active le drag.
-                TransitionToState(new CardPlacementState(drawnCard));
+                TransitionToState(new CardSelectedState(drawnCard));
             }
             else
             {
                 Debug.LogWarning("Impossible de piocher depuis la défausse (vide).");
-                // On pourrait re-transitionner vers DrawChoiceState, mais attention aux boucles infinies!
-                // Pour l'instant, on ne fait rien, ce qui laisse le joueur cliquer à nouveau.
             }
         }
 
-        // --- Méthodes de gestion des événements  ---
-
-        public void OnCardClicked(CardController cardController)
+        // Dans GameManager.cs
+        public void SubscribeToCardSlotEvents()
         {
-            (currentState as ICardClickHandler)?.HandleCardClick(this, cardController);
-        }
-
-        public void OnCardDragStarted(CardController cardController)
-        {
-            (currentState as ICardDragStartHandler)?.HandleCardDragStart(this, cardController);
-        }
-
-        public void OnCardDragEnded(CardController cardController)
-        {
-            (currentState as ICardDragEndHandler)?.HandleCardDragEnd(this, cardController);
-        }
-
-        public void OnCardPlaced(CardSlotController cardSlotController)
-        {
-            (currentState as ICardPlacementHandler)?.HandleCardPlacement(this, cardSlotController);
-        }
-
-        public void OnCardRemoved(CardSlotController cardSlotController)
-        {
-            (currentState as ICardRemoveHandler)?.HandleCardRemove(this, cardSlotController);
+            foreach (var player in players)
+            {
+                foreach (var slot in player.PlayerBoardController.playerBoardView.cardSlots)
+                {
+                    // GameManager s'abonne à l'événement de CHAQUE CardSlot.
+                    GameEvents.OnCardSlotClicked += HandleCardSlotClicked;
+                }
+            }
         }
     }
 }

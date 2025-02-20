@@ -1,137 +1,93 @@
-// --- States/RevealTwoCardsState.cs --- (Version Complète)
 using UnityEngine;
 using com.hyminix.game.ojyx.Controllers;
 using com.hyminix.game.ojyx.Managers;
+using UnityEngine.EventSystems;
 
 namespace com.hyminix.game.ojyx.States
 {
-    public class RevealTwoCardsState : IGameState, ICardClickHandler
+    public class RevealTwoCardsState : IGameState
     {
-        private int playersRevealedCount = 0; // Compteur de joueurs ayant révélé leurs cartes
+        private int playersRevealedCount = 0;
 
         public void EnterState(GameManager manager)
         {
-            Debug.Log("RevealTwoCardsState: Chaque joueur révèle deux cartes.");
-            playersRevealedCount = 0; // Initialisation du compteur
-            SubscribeToEvents(manager); // S'abonner aux événements de clic
-            //On affiche le joueur actuel
-            Debug.Log("Joueur " + manager.CurrentPlayer.playerID + " veuillez révéler deux cartes");
+            Debug.Log("RevealTwoCardsState: Chaque joueur doit révéler deux cartes.");
+            playersRevealedCount = 0;
+            Debug.Log("Joueur " + manager.CurrentPlayer.playerID + " : veuillez révéler deux cartes.");
         }
 
         public void ExecuteState(GameManager manager)
         {
-            //Tout est géré dans le OnCardClick
+            // La logique est gérée via HandleCardClick.
         }
 
         public void ExitState(GameManager manager)
         {
-            UnsubscribeFromEvents(manager); // Se désabonner
-            Debug.Log("RevealTwoCardsState: Fin de la révélation des cartes.");
+            Debug.Log("RevealTwoCardsState: Fin de la phase de révélation.");
         }
 
-        //Fonction appelé au clic de la carte
-        public void HandleCardClick(GameManager manager, CardController cardController)
+        public void HandleCardClick(GameManager manager, CardController cardController, PointerEventData eventData)
         {
-            // Vérifie si la carte cliquée appartient au joueur actuel *ET* si elle est face cachée.
-            //Si la carte est déjà face visible ou n'appartient pas au joueur, on ne fait rien
-            if (cardController.Card.IsFaceUp || !IsCardBelongToPlayer(manager.CurrentPlayer, cardController.Card))
+            // Vérifie si la carte est valide (existe, non déjà révélée, appartient au joueur courant)
+            if (cardController == null)
             {
+                Debug.LogWarning("RevealTwoCardsState.HandleCardClick: CardController est null.");
+                return;
+            }
+            if (cardController.Card.IsFaceUp)
+            {
+                Debug.Log("RevealTwoCardsState.HandleCardClick: Carte déjà révélée.");
+                return;
+            }
+            if (!IsCardBelongToPlayer(manager.CurrentPlayer, cardController.Card))
+            {
+                Debug.Log("RevealTwoCardsState.HandleCardClick: La carte ne correspond pas au joueur courant.");
                 return;
             }
 
-            //Si le joueur a déjà revelé deux cartes, on ne fait rien
+            // Vérifie si le joueur a déjà révélé le maximum de cartes
             if (manager.CurrentPlayer.Player.revealedCardCount >= manager.CurrentPlayer.Player.maxRevealedCards)
             {
+                Debug.Log("RevealTwoCardsState.HandleCardClick: Le joueur a déjà révélé le maximum de cartes.");
                 return;
             }
 
-            //Revele la carte visuellement et au niveau du model
+            // Révélation de la carte
             cardController.Flip();
-
-            //Incrémente le compteur de carte révélé par le joueur
             manager.CurrentPlayer.Player.revealedCardCount++;
+            Debug.Log("RevealTwoCardsState: Carte révélée. Nombre total révélé pour le joueur : " + manager.CurrentPlayer.Player.revealedCardCount);
 
-            //Si le joueur a revelé deux cartes
+            // Si le joueur a terminé sa révélation
             if (manager.CurrentPlayer.Player.revealedCardCount >= manager.CurrentPlayer.Player.maxRevealedCards)
             {
-                playersRevealedCount++; //On incrémente le compteur de joueur
+                playersRevealedCount++;
+                Debug.Log("RevealTwoCardsState: Joueur " + manager.CurrentPlayer.playerID + " a révélé toutes ses cartes.");
 
-                //Si tous les joueurs ont revelé leur carte
                 if (playersRevealedCount >= manager.players.Count)
                 {
-                    DetermineFirstPlayer(manager); //On determine le premier joueur
-                    manager.TransitionToState(new DiscardFirstCardState()); //On passe a l'état suivant
-                    return; // Important : on quitte la méthode ici.
+                    Debug.Log("RevealTwoCardsState: Tous les joueurs ont révélé leurs cartes. Transition vers DiscardFirstCardState.");
+                    manager.TransitionToState(new PlayerTurnState());
+                    return;
                 }
                 else
                 {
-                    //On passe au joueur suivant
+                    // Passage au joueur suivant
                     manager.NextPlayer();
-                    Debug.Log("Joueur " + manager.CurrentPlayer.playerID + " veuillez révéler deux cartes");
+                    Debug.Log("RevealTwoCardsState: Passe au joueur " + manager.CurrentPlayer.playerID + " pour la révélation.");
                 }
             }
         }
 
-        //Fonction pour verifier si la carte appartient bien au joueur
         private bool IsCardBelongToPlayer(PlayerController playerController, Models.Card card)
         {
             foreach (var slot in playerController.PlayerBoardController.playerBoardView.cardSlots)
             {
-                //Si le slot n'est pas vide
-                if (slot.cardSlot.card != null)
+                if (slot.cardSlot.card != null && slot.cardSlot.card == card)
                 {
-                    //Si la carte du slot correspond a la carte cliqué
-                    if (slot.cardSlot.card == card)
-                    {
-                        return true; //On retourne true
-                    }
+                    return true;
                 }
             }
             return false;
-        }
-
-
-        private void SubscribeToEvents(GameManager manager)
-        {
-            //On s'abonne aux evenements des cartes du joueur
-            // OPTIMISATION:  On s'abonne SEULEMENT aux cartes du joueur courant.
-            foreach (var slot in manager.CurrentPlayer.PlayerBoardController.playerBoardView.cardSlots)
-            {
-                if (slot.cardSlot.card != null) // S'il y a une carte
-                {
-                    CardController cardController = slot.GetComponentInChildren<CardController>();
-                    if (cardController != null)
-                    {
-                        cardController.OnCardClicked += manager.OnCardClicked;
-                    }
-                }
-            }
-        }
-
-        private void UnsubscribeFromEvents(GameManager manager)
-        {
-            //On se désabonne
-            foreach (var slot in manager.CurrentPlayer.PlayerBoardController.playerBoardView.cardSlots)
-            {
-                if (slot.cardSlot.card != null) // S'il y a une carte
-                {
-                    CardController cardController = slot.GetComponentInChildren<CardController>();
-                    if (cardController != null)
-                    {
-                        cardController.OnCardClicked -= manager.OnCardClicked;
-                    }
-                }
-            }
-        }
-
-
-
-        private void DetermineFirstPlayer(GameManager manager)
-        {
-            // TODO: Implémenter la logique pour déterminer le premier joueur
-            // (par exemple, en comparant la somme des valeurs des cartes révélées).
-            // Pour l'instant, on commence par le joueur 0.
-            manager.currentPlayerIndex = 0;
         }
     }
 }

@@ -1,7 +1,9 @@
 // --- States/EndRoundState.cs --- (Complet)
 //Calcul des scores et vérification de la fin de la partie
 using com.hyminix.game.ojyx.Controllers;
+using com.hyminix.game.ojyx.Managers;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace com.hyminix.game.ojyx.States
 {
@@ -50,6 +52,11 @@ namespace com.hyminix.game.ojyx.States
                 }
             }
             return score;
+        }
+
+        public void HandleCardClick(GameManager manager, CardController cardController, PointerEventData eventData)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

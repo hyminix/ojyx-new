@@ -1,3 +1,4 @@
+// --- Controllers/PlayerController.cs --- (CORRIGÉ : Utilise DrawFromDeck)
 // --- Controllers/PlayerController.cs --- (Modifié)
 using UnityEngine;
 using Sirenix.OdinInspector;
@@ -73,7 +74,7 @@ namespace com.hyminix.game.ojyx.Controllers
                                                 if (!slotView.cardSlot.IsOccupied) // Trouve le premier slot *vue* vide
                                                 {
                                                         drawnCard.SetPosition(slotView.cardSlot.row, slotView.cardSlot.column);
-                                                        playerBoardController.PlayerBoard.PlaceCard(drawnCard); // Place dans le modèle
+                                                        // playerBoardController.PlayerBoard.PlaceCard(drawnCard); // Place dans le modèle
                                                         slotView.PlaceCard(drawnCardController); // Place le CardController dans la vue
                                                         break; // Important: Sortir de la boucle après avoir placé la carte.
                                                 }

@@ -1,8 +1,8 @@
-// --- States/DrawChoiceState.cs --- (CORRIGÉ et SIMPLIFIÉ)
-
+// --- States/DrawChoiceState.cs ---
 using UnityEngine;
 using com.hyminix.game.ojyx.Controllers;
 using com.hyminix.game.ojyx.Managers;
+using UnityEngine.EventSystems;
 
 namespace com.hyminix.game.ojyx.States
 {
@@ -15,66 +15,36 @@ namespace com.hyminix.game.ojyx.States
         {
             Debug.Log("DrawChoiceState: Choisissez entre piocher ou prendre la défausse.");
             deckController = manager.DeckController;
-            this.gameManager = manager;
-
-            SubscribeToEvents();
+            gameManager = manager;
         }
 
         public void ExecuteState(GameManager manager) { }
 
-        public void ExitState(GameManager manager)
-        {
-            UnsubscribeFromEvents();
-        }
+        public void ExitState(GameManager manager) { }
 
-        private void SubscribeToEvents()
+        public void HandleCardClick(GameManager manager, CardController cardController, PointerEventData eventData)
         {
-            // PIOCHE
-            if (deckController.deckCards.Count > 0)
+            Debug.Log("DrawChoiceState.HandleCardClick: Clic détecté!");
+
+            // Si le clic concerne la carte du dessus de la pioche
+            if (deckController.deckCards.Count > 0 && cardController == deckController.deckCards[0])
             {
-                CardController topDeckCard = deckController.deckCards[0];
-                topDeckCard.OnCardClicked += HandleDeckClick; // Utilisez l'événement de CardController
+                Debug.Log("DrawChoiceState.HandleCardClick: Clic sur la carte du dessus de la pioche.");
+                cardController.Flip();
+                gameManager.TransitionToState(new CardSelectedState(cardController));
+                return;
             }
 
-            // DEFAUSSE
-            if (deckController.DiscardPile.cards.Count > 0)
+            // Si le clic concerne la carte du dessus de la défausse
+            CardController topDiscardCard = deckController.discardPileView.GetTopCardController();
+            if (topDiscardCard != null && cardController == topDiscardCard)
             {
-                CardController topDiscardCard = deckController.discardPileView.discardSlot.GetComponentInChildren<CardController>();
-                if (topDiscardCard != null)
-                {
-                    topDiscardCard.OnCardClicked += HandleDiscardClick; // Utilisez l'événement de CardController
-                }
-            }
-        }
-
-        private void UnsubscribeFromEvents()
-        {
-            // PIOCHE
-            if (deckController.deckCards.Count > 0)
-            {
-                CardController topDeckCard = deckController.deckCards[0];
-                topDeckCard.OnCardClicked -= HandleDeckClick;
+                Debug.Log("DrawChoiceState.HandleCardClick: Clic sur la carte du dessus de la défausse.");
+                gameManager.TransitionToState(new CardSelectedState(cardController));
+                return;
             }
 
-            // DEFAUSSE
-            if (deckController.DiscardPile.cards.Count > 0)
-            {
-                CardController topDiscardCard = deckController.discardPileView.discardSlot.GetComponentInChildren<CardController>();
-                if (topDiscardCard != null)
-                {
-                    topDiscardCard.OnCardClicked -= HandleDiscardClick;
-                }
-            }
-        }
-
-        private void HandleDeckClick(CardController cardController) // Ajout du paramètre
-        {
-            gameManager.DrawFromDeck();
-        }
-
-        private void HandleDiscardClick(CardController cardController) // Ajout du paramètre
-        {
-            gameManager.DrawFromDiscard();
+            Debug.LogWarning("DrawChoiceState.HandleCardClick: Clic sur une carte non gérée dans cet état.");
         }
     }
 }
