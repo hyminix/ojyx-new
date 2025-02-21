@@ -29,21 +29,24 @@ namespace com.hyminix.game.ojyx.Controllers
                 Debug.LogError("PlayerBoardView not found on " + gameObject.name);
                 return;
             }
-            GenerateBoardSlots();
+            GenerateBoardSlots(); // Plus besoin d'appeler Initialize sur la vue ici.
         }
 
         [Button("Générer les Emplacements")]
         public void GenerateBoardSlots()
         {
-            ClearBoard();
-            // Pour chaque CardSlot du modèle, on instancie un slot visuel et on l'initialise avec l'instance du modèle
+            ClearBoard(); // Détruit les slots existants avant d'en créer de nouveaux
+                          // Pour chaque CardSlot du modèle, on instancie un slot visuel et on l'initialise avec l'instance du modèle
+
+            //CREATION DES SLOTS
             foreach (CardSlot modelSlot in playerBoard.cardSlots)
             {
                 // Calculer la position en fonction des coordonnées du modèle
                 Vector3 slotPos = playerBoardView.boardCenter.position +
                     new Vector3(modelSlot.column * playerBoardView.slotSpacing.x, 0, -modelSlot.row * playerBoardView.slotSpacing.y);
-                GameObject slotObj = Instantiate(playerBoardView.cardSlotPrefab, slotPos, Quaternion.identity, transform);
-                CardSlotController slotController = slotObj.GetComponent<CardSlotController>();
+
+                GameObject slotObj = Instantiate(playerBoardView.cardSlotPrefab, slotPos, Quaternion.identity, transform); // Crée le prefab
+                CardSlotController slotController = slotObj.GetComponent<CardSlotController>(); // Récupère le controller
                 if (slotController == null)
                 {
                     Debug.LogError("CardSlotController non trouvé sur le prefab du slot !");
@@ -58,15 +61,21 @@ namespace com.hyminix.game.ojyx.Controllers
 
         private void ClearBoard()
         {
+            // Détruire les GameObjects des slots existants *avant* de vider la liste.
             foreach (var slot in playerBoardView.cardSlots)
             {
-                if (slot != null)
-                    Destroy(slot.gameObject);
+                if (slot != null && slot.gameObject != null) // Vérifications supplémentaires
+                {
+                    Destroy(slot.gameObject); // Destruction propre
+                }
             }
-            playerBoardView.cardSlots.Clear();
+            playerBoardView.cardSlots.Clear(); // Vider la liste
+
+            // Vider le modèle (si nécessaire, selon ta logique)
             if (playerBoard != null)
                 playerBoard.Clear();
         }
+
 
         public bool AreAllCardsRevealed()
         {

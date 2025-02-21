@@ -54,7 +54,8 @@ namespace com.hyminix.game.ojyx.States
             return score;
         }
 
-        public void HandleCardClick(GameManager manager, CardController cardController, PointerEventData eventData)
+
+        public void HandleCardClick(GameManager manager, CardSlotController cardSlotController)
         {
             throw new System.NotImplementedException();
         }

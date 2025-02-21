@@ -1,7 +1,8 @@
+// --- States/RevealTwoCardsState.cs ---
 using UnityEngine;
 using com.hyminix.game.ojyx.Controllers;
 using com.hyminix.game.ojyx.Managers;
-using UnityEngine.EventSystems;
+//SUPPRIMER using UnityEngine.EventSystems;
 
 namespace com.hyminix.game.ojyx.States
 {
@@ -26,20 +27,22 @@ namespace com.hyminix.game.ojyx.States
             Debug.Log("RevealTwoCardsState: Fin de la phase de révélation.");
         }
 
-        public void HandleCardClick(GameManager manager, CardController cardController, PointerEventData eventData)
+        public void HandleCardClick(GameManager manager, CardSlotController slotController)
         {
             // Vérifie si la carte est valide (existe, non déjà révélée, appartient au joueur courant)
-            if (cardController == null)
+
+            // Vérifier si le slot a une carte
+            if (slotController.CardController == null)
             {
-                Debug.LogWarning("RevealTwoCardsState.HandleCardClick: CardController est null.");
                 return;
             }
-            if (cardController.Card.IsFaceUp)
+
+            if (slotController.CardController.Card.IsFaceUp)
             {
                 Debug.Log("RevealTwoCardsState.HandleCardClick: Carte déjà révélée.");
                 return;
             }
-            if (!IsCardBelongToPlayer(manager.CurrentPlayer, cardController.Card))
+            if (!IsCardBelongToPlayer(manager.CurrentPlayer, slotController.CardController.Card))
             {
                 Debug.Log("RevealTwoCardsState.HandleCardClick: La carte ne correspond pas au joueur courant.");
                 return;
@@ -53,7 +56,7 @@ namespace com.hyminix.game.ojyx.States
             }
 
             // Révélation de la carte
-            cardController.Flip();
+            slotController.CardController.Flip();
             manager.CurrentPlayer.Player.revealedCardCount++;
             Debug.Log("RevealTwoCardsState: Carte révélée. Nombre total révélé pour le joueur : " + manager.CurrentPlayer.Player.revealedCardCount);
 

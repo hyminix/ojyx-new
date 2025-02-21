@@ -1,8 +1,7 @@
-// --- States/CardSelectedState.cs --- (SIMPLIFIÉ : Plus d'événements)
+// --- States/CardSelectedState.cs ---
 using UnityEngine;
 using com.hyminix.game.ojyx.Controllers;
 using com.hyminix.game.ojyx.Managers;
-using UnityEngine.EventSystems;
 
 namespace com.hyminix.game.ojyx.States
 {
@@ -19,7 +18,7 @@ namespace com.hyminix.game.ojyx.States
         public void EnterState(GameManager manager)
         {
             Debug.Log("CardSelectedState: EnterState");
-            // selectedCard.transform.localScale = Vector3.one * 1.2f;
+            // selectedCard.transform.localScale = Vector3.one * 1.2f; // On garde ça pour plus tard, quand on aura réglé les pb de DOTween.
 
             foreach (var slot in manager.CurrentPlayer.PlayerBoardController.playerBoardView.cardSlots)
             {
@@ -32,7 +31,7 @@ namespace com.hyminix.game.ojyx.States
         public void ExitState(GameManager manager)
         {
             Debug.Log("CardSelectedState: ExitState");
-            selectedCard.transform.localScale = Vector3.one;
+            // selectedCard.transform.localScale = Vector3.one;  // On garde ça pour plus tard
 
             foreach (var slot in manager.CurrentPlayer.PlayerBoardController.playerBoardView.cardSlots)
             {
@@ -40,39 +39,22 @@ namespace com.hyminix.game.ojyx.States
             }
         }
 
-        //On garde la fonction HandleCardClick mais on simplifie
-        public void HandleCardClick(GameManager manager, CardController cardController, PointerEventData eventData)
+        public void HandleCardClick(GameManager manager, CardSlotController slotController)
         {
             Debug.Log("CardSelectedState.HandleCardClick: Clic détecté!");
 
-            // 1. Est-ce que la carte cliquée est un slot du joueur courant ?
-            CardSlotController slotController = cardController.GetComponentInParent<CardSlotController>();
+            // 1. Est-ce que le slot cliqué appartient au plateau du joueur courant ?
             if (slotController != null && slotController.transform.IsChildOf(manager.CurrentPlayer.PlayerBoardController.transform))
             {
                 Debug.Log("CardSelectedState.HandleCardClick: Clic sur un CardSlotController du joueur courant");
 
-                // 2. Le slot appartient-il au plateau du joueur courant?
-                if (manager.CurrentPlayer.PlayerBoardController.PlayerBoard.cardSlots.Contains(slotController.cardSlot))
-                {
-                    Debug.Log("CardSelectedState.HandleCardClick: Le slot appartient au PlayerBoard.");
+                // 2. Tenter de PLACER la carte sélectionnée.
+                slotController.PlaceCard(selectedCard); // Place card s'occupe de tout
 
-                    // 3. Tenter de PLACER la carte sélectionnée.
-                    slotController.PlaceCard(selectedCard);
+                Debug.Log("CardSelectedState.HandleCardClick: Carte placée, transition vers EndTurnState.");
+                manager.TransitionToState(new EndTurnState());
 
-                    Debug.Log("CardSelectedState.HandleCardClick: Carte placée, transition vers EndTurnState.");
-                    manager.TransitionToState(new EndTurnState());
-                    return;
-                }
-                else
-                {
-                    Debug.Log("CardSelectedState.HandleCardClick: Le slot n'appartient PAS au PlayerBoard.");
-                }
-            }
-            else if (cardController == selectedCard)
-            {
-                Debug.Log("CardSelectedState.HandleCardClick: Clic sur la carte sélectionnée, retour à DrawChoiceState.");
-                manager.TransitionToState(new DrawChoiceState());
-                return;
+
             }
             else
             {

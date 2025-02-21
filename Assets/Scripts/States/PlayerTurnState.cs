@@ -4,7 +4,7 @@ using com.hyminix.game.ojyx.Controllers;
 using com.hyminix.game.ojyx.Models;
 using com.hyminix.game.ojyx.Managers;
 using com.hyminix.game.ojyx.Views;
-using UnityEngine.EventSystems;
+//SUPPRIMER using UnityEngine.EventSystems;
 
 namespace com.hyminix.game.ojyx.States
 {
@@ -26,13 +26,12 @@ namespace com.hyminix.game.ojyx.States
         public void ExitState(GameManager manager)
         {
             Debug.Log("PlayerTurnState: Fin du tour du joueur " + manager.CurrentPlayer.playerID);
-            //On supprime le unsubscribe
         }
 
-        //On ajoute la fonction HandleCardClick
-        public void HandleCardClick(GameManager manager, CardController cardController, PointerEventData eventData)
+        //On ajoute la fonction HandleCardClick, mais elle est vide
+        public void HandleCardClick(GameManager manager, CardSlotController slotController)
         {
-
+            //Rien à faire ici
         }
     }
 }

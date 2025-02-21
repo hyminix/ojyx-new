@@ -2,7 +2,7 @@
 using UnityEngine;
 using com.hyminix.game.ojyx.Controllers;
 using com.hyminix.game.ojyx.Managers;
-using UnityEngine.EventSystems;
+//SUPPRIMER using UnityEngine.EventSystems;
 
 namespace com.hyminix.game.ojyx.States
 {
@@ -15,22 +15,30 @@ namespace com.hyminix.game.ojyx.States
 
         public void ExecuteState(GameManager manager)
         {
+
         }
 
         public void ExitState(GameManager manager)
         {
+
         }
 
-        public void HandleCardClick(GameManager manager, CardController cardController, PointerEventData eventData)
+        public void HandleCardClick(GameManager manager, CardSlotController slotController)
         {
+            // Vérifier si le slot a une carte
+            if (slotController.CardController == null)
+            {
+                return;
+            }
+
             // Vérifie si la carte cliquée appartient au joueur actuel *ET* si elle est face cachée.
-            if (cardController.Card.IsFaceUp || !IsCardBelongToPlayer(manager.CurrentPlayer, cardController.Card))
+            if (slotController.CardController.Card.IsFaceUp || !IsCardBelongToPlayer(manager.CurrentPlayer, slotController.CardController.Card))
             {
                 return; // Ne fait rien si la carte est déjà face visible ou n'appartient pas au joueur
             }
 
             //Revele la carte visuellement et au niveau du model
-            cardController.Flip();
+            slotController.CardController.Flip();
             manager.TransitionToState(new EndTurnState()); //On passe a la fin de tour
         }
 

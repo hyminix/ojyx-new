@@ -4,7 +4,7 @@ using UnityEngine;
 using Sirenix.OdinInspector;
 using com.hyminix.game.ojyx.Controllers;
 using com.hyminix.game.ojyx.States;
-using UnityEngine.EventSystems;
+//SUPPRIMER using UnityEngine.EventSystems;
 
 namespace com.hyminix.game.ojyx.Managers
 {
@@ -35,8 +35,17 @@ namespace com.hyminix.game.ojyx.Managers
             else
                 Destroy(gameObject);
 
-            // FindFirstObjectByType au lieu de FindObjectOfType
             deckController = FindFirstObjectByType<DeckController>();
+
+            // --- Initialisation des PlayerControllers ---
+            PlayerController[] playerControllers = FindObjectsOfType<PlayerController>();
+            foreach (PlayerController pc in playerControllers)
+            {
+                // Initialise le PlayerController avec un ID unique (pour l'instant, basé sur l'ordre dans la scène)
+                pc.Initialize(players.Count);
+                players.Add(pc);
+            }
+            // --- Fin de l'initialisation des PlayerControllers ---
         }
 
         private void Start()
@@ -45,18 +54,14 @@ namespace com.hyminix.game.ojyx.Managers
             TransitionToState(new SetupState());
         }
 
-        // On utilise OnEnable et OnDisable pour gérer les abonnements aux événements.
-        // C'est plus propre et plus sûr que Start/ExitState.
         private void OnEnable()
         {
-            // Utilisation directe de GameEvents
-            GameEvents.OnCardSlotClicked += HandleCardSlotClicked;
+            GameEvents.OnCardSlotClicked += HandleCardSlotClicked; // MODIFIÉ
         }
 
         private void OnDisable()
         {
-            // Utilisation directe de GameEvents
-            GameEvents.OnCardSlotClicked -= HandleCardSlotClicked;
+            GameEvents.OnCardSlotClicked -= HandleCardSlotClicked; // MODIFIÉ
         }
 
 
@@ -70,7 +75,14 @@ namespace com.hyminix.game.ojyx.Managers
         {
             currentState?.ExitState(this);
             currentState = newState;
-            currentState.EnterState(this);
+
+            // --- Affichage du CurrentState dans l'inspecteur (Correction) ---
+            if (currentState != null)
+            {
+                Debug.Log("Current State: " + currentState.GetType().Name); // Ajout pour le débogage
+            }
+            // --- Fin de l'affichage ---
+            currentState?.EnterState(this);
         }
 
         public void NextPlayer()
@@ -80,11 +92,12 @@ namespace com.hyminix.game.ojyx.Managers
         }
 
         // MODIFICATION :  Cette méthode reçoit maintenant un CardSlotController, pas un CardController.
-        private void HandleCardSlotClicked(CardSlotController slotController, PointerEventData eventData) // MODIFIÉ
+        private void HandleCardSlotClicked(CardSlotController slotController) // MODIFIÉ
         {
             Debug.Log("GameManager.HandleCardSlotClicked: Clic détecté!");
-            CardController cardController = slotController.GetComponentInChildren<CardController>();
-            currentState.HandleCardClick(this, cardController, eventData); // MODIFIÉ : Passe eventData
+
+            //On regarde dans quel état on est et ce qu'on doit faire
+            currentState.HandleCardClick(this, slotController);
         }
 
         public void DrawFromDeck()
@@ -114,17 +127,5 @@ namespace com.hyminix.game.ojyx.Managers
             }
         }
 
-        // Dans GameManager.cs
-        public void SubscribeToCardSlotEvents()
-        {
-            foreach (var player in players)
-            {
-                foreach (var slot in player.PlayerBoardController.playerBoardView.cardSlots)
-                {
-                    // GameManager s'abonne à l'événement de CHAQUE CardSlot.
-                    GameEvents.OnCardSlotClicked += HandleCardSlotClicked;
-                }
-            }
-        }
     }
 }

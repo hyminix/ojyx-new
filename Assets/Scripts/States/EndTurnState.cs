@@ -18,7 +18,7 @@ namespace com.hyminix.game.ojyx.States
         public void ExecuteState(Managers.GameManager manager) { }
         public void ExitState(Managers.GameManager manager) { }
 
-        public void HandleCardClick(GameManager manager, CardController cardController, PointerEventData eventData)
+        public void HandleCardClick(GameManager manager, CardSlotController cardSlotController)
         {
             throw new System.NotImplementedException();
         }
