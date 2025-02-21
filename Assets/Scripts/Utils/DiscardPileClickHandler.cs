@@ -1,8 +1,9 @@
-// DiscardPileClickHandler.cs
+// DiscardPileClickHandler.cs (Appel correct de ExecuteAction en fonction de l'état)
 using UnityEngine;
 using UnityEngine.EventSystems;
-using com.hyminix.game.ojyx.Managers; // Pour accéder au GameManager
-using com.hyminix.game.ojyx.States; // Pour accéder à CardSelectedState
+using com.hyminix.game.ojyx.Managers;
+using com.hyminix.game.ojyx.States;
+using com.hyminix.game.ojyx.Enums;
 
 public class DiscardPileClickHandler : MonoBehaviour, IPointerClickHandler
 {
@@ -11,16 +12,13 @@ public class DiscardPileClickHandler : MonoBehaviour, IPointerClickHandler
         // Vérifie si l'état actuel est CardSelectedState
         if (GameManager.Instance.CurrentState is CardSelectedState)
         {
-            // Récupère la carte sélectionnée depuis l'état
-            CardSelectedState currentState = (CardSelectedState)GameManager.Instance.CurrentState;
-
-            // Appelle la méthode DiscardSelectedCard du GameManager
-            GameManager.Instance.DiscardSelectedCard(currentState.selectedCard);
+            // Si oui, on défausse la carte sélectionnée.
+            GameManager.Instance.ExecuteAction(GameManager.Instance.CurrentState, PlayerAction.DiscardDrawnCard);
         }
         else
         {
-            // Si l'état n'est pas CardSelectedState, on essaie de piocher depuis la défausse
-            GameManager.Instance.DrawFromDiscard();
+            // Sinon, on pioche depuis la défausse (comportement normal).
+            GameManager.Instance.ExecuteAction(GameManager.Instance.CurrentState, PlayerAction.DrawFromDiscard);
         }
     }
 }

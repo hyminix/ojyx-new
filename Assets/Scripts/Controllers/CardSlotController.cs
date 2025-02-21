@@ -1,4 +1,4 @@
-// --- Controllers/CardSlotController.cs ---
+// --- Controllers/CardSlotController.cs --- (Simplification: plus besoin de s'abonner au ClickHandler)
 using UnityEngine;
 using DG.Tweening;
 using com.hyminix.game.ojyx.Models;
@@ -30,10 +30,8 @@ namespace com.hyminix.game.ojyx.Controllers
             }
             cardSlotView.Initialize(cardSlot);
 
-            GetComponent<Collider>().gameObject.AddComponent<ClickHandler>().OnClick += () =>
-            {
-                GameEvents.TriggerCardSlotClicked(this);
-            };
+            // SIMPLIFICATION : On ajoute le ClickHandler, c'est tout.
+            GetComponent<Collider>().gameObject.AddComponent<ClickHandler>();
         }
 
         public void PlaceCard(CardController newCardController)
