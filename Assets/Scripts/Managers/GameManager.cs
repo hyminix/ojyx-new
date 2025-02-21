@@ -1,10 +1,9 @@
-// --- Managers/GameManager.cs --- (Gestion Centralisée des Clics)
+// --- Managers/GameManager.cs ---
 using System.Collections.Generic;
 using UnityEngine;
 using Sirenix.OdinInspector;
 using com.hyminix.game.ojyx.Controllers;
 using com.hyminix.game.ojyx.States;
-//SUPPRIMER using UnityEngine.EventSystems;
 
 namespace com.hyminix.game.ojyx.Managers
 {
@@ -37,15 +36,12 @@ namespace com.hyminix.game.ojyx.Managers
 
             deckController = FindFirstObjectByType<DeckController>();
 
-            // --- Initialisation des PlayerControllers ---
             PlayerController[] playerControllers = FindObjectsOfType<PlayerController>();
             foreach (PlayerController pc in playerControllers)
             {
-                // Initialise le PlayerController avec un ID unique (pour l'instant, basé sur l'ordre dans la scène)
                 pc.Initialize(players.Count);
                 players.Add(pc);
             }
-            // --- Fin de l'initialisation des PlayerControllers ---
         }
 
         private void Start()
@@ -56,15 +52,13 @@ namespace com.hyminix.game.ojyx.Managers
 
         private void OnEnable()
         {
-            GameEvents.OnCardSlotClicked += HandleCardSlotClicked; // MODIFIÉ
+            GameEvents.OnCardSlotClicked += HandleCardSlotClicked;
         }
 
         private void OnDisable()
         {
-            GameEvents.OnCardSlotClicked -= HandleCardSlotClicked; // MODIFIÉ
+            GameEvents.OnCardSlotClicked -= HandleCardSlotClicked;
         }
-
-
 
         private void Update()
         {
@@ -76,12 +70,10 @@ namespace com.hyminix.game.ojyx.Managers
             currentState?.ExitState(this);
             currentState = newState;
 
-            // --- Affichage du CurrentState dans l'inspecteur (Correction) ---
             if (currentState != null)
             {
-                Debug.Log("Current State: " + currentState.GetType().Name); // Ajout pour le débogage
+                Debug.Log("Current State: " + currentState.GetType().Name);
             }
-            // --- Fin de l'affichage ---
             currentState?.EnterState(this);
         }
 
@@ -91,12 +83,9 @@ namespace com.hyminix.game.ojyx.Managers
             Debug.Log("Passage au joueur suivant : " + CurrentPlayer.playerID);
         }
 
-        // MODIFICATION :  Cette méthode reçoit maintenant un CardSlotController, pas un CardController.
-        private void HandleCardSlotClicked(CardSlotController slotController) // MODIFIÉ
+        private void HandleCardSlotClicked(CardSlotController slotController)
         {
             Debug.Log("GameManager.HandleCardSlotClicked: Clic détecté!");
-
-            //On regarde dans quel état on est et ce qu'on doit faire
             currentState.HandleCardClick(this, slotController);
         }
 
@@ -105,7 +94,7 @@ namespace com.hyminix.game.ojyx.Managers
             CardController drawnCard = deckController.DrawFromDeck();
             if (drawnCard != null)
             {
-                drawnCard.Flip();
+                drawnCard.Flip(); // Toujours flipper une carte piochée de la pioche.
                 TransitionToState(new CardSelectedState(drawnCard));
             }
             else
@@ -119,6 +108,7 @@ namespace com.hyminix.game.ojyx.Managers
             CardController drawnCard = deckController.DrawFromDiscardPile();
             if (drawnCard != null)
             {
+                // Pas besoin de Flip() ici, la carte de la défausse est déjà visible.
                 TransitionToState(new CardSelectedState(drawnCard));
             }
             else
@@ -127,5 +117,18 @@ namespace com.hyminix.game.ojyx.Managers
             }
         }
 
+        public void DiscardSelectedCard(CardController cardController)
+        {
+            if (currentState is CardSelectedState)
+            {
+                // Pas de Flip() ici, la carte a déjà été éventuellement flippée dans DrawChoiceState.
+                DeckController.DiscardCardWithAnimation(cardController, 0.5f, DG.Tweening.Ease.OutQuad);
+                TransitionToState(new RevealChosenCardState());
+            }
+            else
+            {
+                Debug.LogError("DiscardSelectedCard appelée en dehors de CardSelectedState !");
+            }
+        }
     }
 }

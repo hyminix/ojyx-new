@@ -21,7 +21,6 @@ namespace com.hyminix.game.ojyx.Controllers
 
         public void Initialize()
         {
-            // Crée le modèle de plateau qui va contenir une liste de CardSlot
             playerBoard = new PlayerBoard(columns, rows);
             playerBoardView = GetComponent<PlayerBoardView>();
             if (playerBoardView == null)
@@ -29,49 +28,41 @@ namespace com.hyminix.game.ojyx.Controllers
                 Debug.LogError("PlayerBoardView not found on " + gameObject.name);
                 return;
             }
-            GenerateBoardSlots(); // Plus besoin d'appeler Initialize sur la vue ici.
+            GenerateBoardSlots();
         }
 
         [Button("Générer les Emplacements")]
         public void GenerateBoardSlots()
         {
-            ClearBoard(); // Détruit les slots existants avant d'en créer de nouveaux
-                          // Pour chaque CardSlot du modèle, on instancie un slot visuel et on l'initialise avec l'instance du modèle
+            ClearBoard();
 
-            //CREATION DES SLOTS
             foreach (CardSlot modelSlot in playerBoard.cardSlots)
             {
-                // Calculer la position en fonction des coordonnées du modèle
-                Vector3 slotPos = playerBoardView.boardCenter.position +
-                    new Vector3(modelSlot.column * playerBoardView.slotSpacing.x, 0, -modelSlot.row * playerBoardView.slotSpacing.y);
-
-                GameObject slotObj = Instantiate(playerBoardView.cardSlotPrefab, slotPos, Quaternion.identity, transform); // Crée le prefab
-                CardSlotController slotController = slotObj.GetComponent<CardSlotController>(); // Récupère le controller
+                Vector3 slotPos = playerBoardView.boardCenter.position + new Vector3(modelSlot.column * playerBoardView.slotSpacing.x, 0, -modelSlot.row * playerBoardView.slotSpacing.y);
+                GameObject slotObj = Instantiate(playerBoardView.cardSlotPrefab, slotPos, Quaternion.identity, transform);
+                CardSlotController slotController = slotObj.GetComponent<CardSlotController>();
                 if (slotController == null)
                 {
                     Debug.LogError("CardSlotController non trouvé sur le prefab du slot !");
                     continue;
                 }
-                // Initialiser le slot avec le modèle existant
+
                 slotController.Initialize(modelSlot);
-                // Enregistrer ce slot dans la vue pour qu'il soit accessible par le GameManager
                 playerBoardView.cardSlots.Add(slotController);
             }
         }
 
         private void ClearBoard()
         {
-            // Détruire les GameObjects des slots existants *avant* de vider la liste.
             foreach (var slot in playerBoardView.cardSlots)
             {
-                if (slot != null && slot.gameObject != null) // Vérifications supplémentaires
+                if (slot != null && slot.gameObject != null)
                 {
-                    Destroy(slot.gameObject); // Destruction propre
+                    Destroy(slot.gameObject);
                 }
             }
-            playerBoardView.cardSlots.Clear(); // Vider la liste
+            playerBoardView.cardSlots.Clear();
 
-            // Vider le modèle (si nécessaire, selon ta logique)
             if (playerBoard != null)
                 playerBoard.Clear();
         }
@@ -82,21 +73,19 @@ namespace com.hyminix.game.ojyx.Controllers
             return playerBoard.AreAllCardsRevealed();
         }
 
-        // Méthode simplifiée pour récupérer le CardController à une position donnée
         public CardController GetCardControllerAt(int row, int col)
         {
             var slot = playerBoardView.cardSlots.Find(s => s.cardSlot.row == row && s.cardSlot.column == col);
             return slot != null ? slot.CardController : null;
         }
 
-        // Méthode pour forcer le placement initial d'une carte
         public void PlaceCardInitial(Card card, CardController cardController)
         {
             foreach (CardSlotController slotView in playerBoardView.cardSlots)
             {
                 if (slotView.cardSlot.row == card.row && slotView.cardSlot.column == card.column)
                 {
-                    slotView.PlaceCard(cardController);
+                    slotView.PlaceCard(cardController); // PlaceCard gère tout.
                     return;
                 }
             }

@@ -1,3 +1,4 @@
+// --- Views/DeckView.cs ---
 using UnityEngine;
 using Sirenix.OdinInspector;
 using com.hyminix.game.ojyx.Models;
@@ -10,7 +11,7 @@ namespace com.hyminix.game.ojyx.Views
     {
         [Title("Conteneur du deck (pile)")]
         [SerializeField] private Transform deckContainer; // À assigner dans l'inspecteur
-        [SerializeField] private float offsetZ = 0.02f;       // Décalage en Z entre les cartes
+        //SUPPRIMER [SerializeField] private float offsetZ = 0.02f;
 
         [Title("Prefab de la carte")]
         public GameObject cardPrefab; // Doit être public pour être utilisé par le DeckController
@@ -21,91 +22,77 @@ namespace com.hyminix.game.ojyx.Views
         // Liste interne de CardController affichés
         private List<CardController> deckCardControllers = new List<CardController>();
 
-        /// <summary>
-        /// Rafraîchit l'affichage complet du deck en pile.
-        /// </summary>
         [Button("Refresh Deck View")]
         public void RefreshDeckView()
         {
             ClearDeckView();
             if (deckModel == null || deckModel.cards.Count == 0) return;
 
+            // Calcule le décalage dynamique.
+            float maxOffset = 0.02f;
+            float minOffset = 0.005f;
+            float offset = Mathf.Lerp(maxOffset, minOffset, (float)deckModel.cards.Count / 150f);
+
+
             for (int i = 0; i < deckModel.cards.Count; i++)
             {
                 Card card = deckModel.cards[i];
                 CardController cardController = CreateCardController(card);
                 cardController.transform.SetParent(deckContainer);
-                float zPos = -offsetZ * i;
+                float zPos = -offset * i;  // Utilise le décalage dynamique
                 cardController.transform.localPosition = new Vector3(0, 0, zPos);
                 cardController.transform.localRotation = Quaternion.identity;
                 deckCardControllers.Add(cardController);
+                //On force le flip des cartes pour les voir face caché
+                if (cardController.Card.IsFaceUp)
+                    cardController.Flip();
             }
         }
 
-        /// <summary>
-        /// Met à jour uniquement la position des cartes restantes dans le deck.
-        /// </summary>
-        public void UpdateDeckPositions()
-        {
-            for (int i = 0; i < deckCardControllers.Count; i++)
-            {
-                float zPos = -offsetZ * i;
-                deckCardControllers[i].transform.localPosition = new Vector3(0, 0, zPos);
-            }
-        }
 
-        /// <summary>
-        /// Renvoie le CardController de la carte du dessus du deck sans le retirer.
-        /// </summary>
-        public CardController PeekTopCardController()
-        {
-            int count = deckContainer.childCount;
-            if (count <= 0)
-                return null;
-            return deckContainer.GetChild(count - 1).GetComponent<CardController>();
-        }
-
-
-        /// <summary>
-        /// Retire la carte du dessus du deck (modèle et vue).
-        /// </summary>
         public CardController RemoveTopCardController()
         {
             if (deckModel == null || deckModel.cards.Count == 0) return null;
-            Debug.Log("RemoveTopCardController: deckModel non nul, count = " + deckModel.cards.Count);
-            // Retire la carte du modèle
+
+            // Retire la carte du modèle *AVANT* de manipuler la vue.
             Card topCard = deckModel.DrawCard();
             if (topCard == null) return null;
-            Debug.Log("RemoveTopCardController: topCard retirée du modèle");
 
-            int lastIndex = deckCardControllers.Count - 1;
-            if (lastIndex < 0)
+            //Trouve le controller qui correspond a la carte
+            CardController topCardController = null;
+            foreach (CardController cardC in deckCardControllers)
             {
-                Debug.LogWarning("RemoveTopCardController: aucune carte dans deckCardControllers");
-                return null;
+                if (cardC.Card == topCard)
+                {
+                    topCardController = cardC;
+                    break;
+                }
             }
-            CardController topCardController = deckCardControllers[lastIndex];
-            deckCardControllers.RemoveAt(lastIndex);
-            topCardController.transform.SetParent(null);
+
+            if (topCardController == null) return null; //Ne devrait jamais arriver
+
+            deckCardControllers.Remove(topCardController); // Retire de la liste *locale*.
+            // topCardController.transform.SetParent(null); // Détache la carte *avant* de la renvoyer.
+            RefreshDeckView(); // On rafraichit la vue pour repositionner les cartes
             return topCardController;
         }
 
-        /// <summary>
-        /// Vide complètement la vue du deck.
-        /// </summary>
+
+
         [Button("Clear Deck View")]
         public void ClearDeckView()
         {
-            for (int i = deckContainer.childCount - 1; i >= 0; i--)
+            // Destruction propre des GameObjects.
+            for (int i = deckCardControllers.Count - 1; i >= 0; i--)
             {
-                Destroy(deckContainer.GetChild(i).gameObject);
+                if (deckCardControllers[i] != null && deckCardControllers[i].gameObject != null)
+                {
+                    Destroy(deckCardControllers[i].gameObject);
+                }
             }
             deckCardControllers.Clear();
         }
 
-        /// <summary>
-        /// Crée un CardController pour une carte donnée.
-        /// </summary>
         private CardController CreateCardController(Card card)
         {
             GameObject cardObj = Instantiate(cardPrefab);

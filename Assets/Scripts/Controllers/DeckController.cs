@@ -1,3 +1,4 @@
+// --- Controllers/DeckController.cs ---
 using System.Collections.Generic;
 using UnityEngine;
 using Sirenix.OdinInspector;
@@ -14,8 +15,8 @@ namespace com.hyminix.game.ojyx.Controllers
         [SerializeField] private List<CardData> cardTemplates;
 
         [Title("Prefabs & Positions")]
-        public GameObject cardPrefab; // Public pour l'accès
-        public Transform deckPosition;
+        public GameObject cardPrefab;
+        public Transform deckPosition; // Gardé pour l'instant, mais pourrait être supprimé si DeckView gère le DrawFromDeck
 
         [Title("Composants")]
         [SerializeField, ReadOnly] private Deck deck;
@@ -24,18 +25,19 @@ namespace com.hyminix.game.ojyx.Controllers
         [SerializeField, ReadOnly] private DiscardPile discardPile;
         public DiscardPile DiscardPile => discardPile;
 
-        [SerializeField] public DiscardPileView discardPileView; // Vue de la défausse
+        [SerializeField] public DiscardPileView discardPileView;
 
         public delegate void CardDrawAction(Card card);
         public static event CardDrawAction OnCardDrawnFromDeck;
-        public static event CardDrawAction OnCardDrawnFromDiscard;
+        public static event CardDrawAction OnCardDrawnFromDiscard; // Pas utilisé pour l'instant, mais peut être utile
+
         public DeckView DeckView
         {
             get { return deckView; }
         }
+
         private void Start()
         {
-            // Crée le modèle de défausse
             discardPile = new DiscardPile();
             if (discardPileView != null)
                 discardPileView.discardPileModel = discardPile;
@@ -44,10 +46,7 @@ namespace com.hyminix.game.ojyx.Controllers
         [Button("Initialiser le Deck")]
         public void InitializeDeck()
         {
-            // Crée le modèle Deck
             deck = new Deck(cardTemplates);
-
-            // Récupère le DeckView attaché à ce GameObject
             deckView = GetComponent<DeckView>();
             if (deckView == null)
             {
@@ -56,89 +55,82 @@ namespace com.hyminix.game.ojyx.Controllers
             }
             deckView.deckModel = deck;
 
-            // Initialise l'affichage complet du deck
             deckView.ClearDeckView();
             deckView.RefreshDeckView();
 
-            // Vide également la défausse
             discardPile.Clear();
-            discardPileView?.Clear();
+            discardPileView?.Clear(); // S'assure que la vue est aussi vidée.
         }
 
-        /// <summary>
-        /// Tire la carte du dessus du deck.
-        /// </summary>
+
         public CardController DrawFromDeck()
         {
-            CardController topCardController = deckView.RemoveTopCardController();
+            CardController topCardController = deckView.RemoveTopCardController(); // Retire la carte de la *vue*
             if (topCardController == null)
             {
                 Debug.LogWarning("Deck vide !");
                 return null;
             }
-            deckView.UpdateDeckPositions();
+            // Pas besoin d'appeler deckModel.DrawCard() ici, c'est déjà fait dans RemoveTopCardController.
             OnCardDrawnFromDeck?.Invoke(topCardController.Card);
             return topCardController;
         }
 
-        /// <summary>
-        /// Tire la carte du dessus de la défausse.
-        /// </summary>
+
         public CardController DrawFromDiscardPile()
         {
-            CardController topCardController = discardPileView.DrawTopCardController();
+            CardController topCardController = discardPileView.DrawTopCardController(); // Retire la carte de la *vue*
             if (topCardController == null)
             {
                 Debug.LogWarning("Impossible de piocher depuis la défausse (vide).");
                 return null;
             }
+            // Pas besoin d'appeler discardPile.DrawCard() ici, c'est déjà fait dans DrawTopCardController.
+
             OnCardDrawnFromDiscard?.Invoke(topCardController.Card);
             return topCardController;
         }
 
-        /// <summary>
-        /// Défausse une carte directement (sans animation).
-        /// </summary>
+
         public void DiscardCard(Card card)
         {
             if (card == null) return;
+            card.IsFaceUp = true; // <- Assure que la carte est face visible.
             discardPile.AddCard(card);
             CardController cardController = CreateCardController(card);
             discardPileView?.AddCardToDiscardPile(cardController);
         }
 
-        /// <summary>
-        /// Défausse une carte avec animation.
-        /// </summary>
         public void DiscardCardWithAnimation(CardController cardController, float duration, Ease ease)
         {
             if (cardController == null) return;
             Debug.Log("Mouvement de la carte (DiscardCardWithAnimation)");
-            cardController.Flip();
+
+            // Ajout : Retourner la carte si elle est face cachée.
+            if (!cardController.Card.IsFaceUp)
+            {
+                cardController.Flip();
+            }
+
             cardController.transform.DOMove(discardPileView.transform.position, duration)
                 .SetEase(ease)
                 .OnComplete(() =>
                 {
-                    discardPile.AddCard(cardController.Card);
-                    discardPileView?.AddCardToDiscardPile(cardController);
+                    discardPile.AddCard(cardController.Card); // Ajoute au *modèle*.
+                    discardPileView.AddCardToDiscardPile(cardController); // Ajoute à la *vue*.
                 });
         }
 
-        /// <summary>
-        /// Déplace la première carte du deck vers la défausse.
-        /// </summary>
         public void MoveCardFromDeckToDiscard()
         {
-            CardController cardToDiscard = DrawFromDeck();
+            CardController cardToDiscard = DrawFromDeck(); // Réutilise DrawFromDeck, qui gère déjà le retrait de la vue.
             if (cardToDiscard != null)
             {
+                cardToDiscard.Flip(); // Flip ici, avant la défausse.
                 DiscardCardWithAnimation(cardToDiscard, 0.5f, Ease.OutQuad);
             }
         }
 
-        /// <summary>
-        /// Crée un CardController pour une carte donnée.
-        /// </summary>
         private CardController CreateCardController(Card card)
         {
             GameObject cardObject = Instantiate(cardPrefab);

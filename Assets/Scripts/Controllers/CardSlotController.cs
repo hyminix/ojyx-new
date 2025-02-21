@@ -1,6 +1,5 @@
 // --- Controllers/CardSlotController.cs ---
 using UnityEngine;
-//SUPPRIMER UnityEngine.EventSystems;
 using DG.Tweening;
 using com.hyminix.game.ojyx.Models;
 using com.hyminix.game.ojyx.Views;
@@ -9,15 +8,8 @@ using com.hyminix.game.ojyx.Managers;
 namespace com.hyminix.game.ojyx.Controllers
 {
     [RequireComponent(typeof(CardSlotView))]
-    public class CardSlotController : MonoBehaviour //SUPPRIMER , IPointerClickHandler
+    public class CardSlotController : MonoBehaviour
     {
-        //SUPPRIMER  public delegate void CardSlotAction(CardSlotController slotController);
-        //SUPPRIMER  public event CardSlotAction OnCardPlaced;
-        //SUPPRIMER  public event CardSlotAction OnCardRemoved;
-
-        //SUPPRIMER  public delegate void CardSlotClickedAction(CardController cardController);
-        //SUPPRIMER  public event CardSlotClickedAction OnCardClicked;
-
         public CardSlot cardSlot;
         private CardSlotView cardSlotView;
 
@@ -38,7 +30,6 @@ namespace com.hyminix.game.ojyx.Controllers
             }
             cardSlotView.Initialize(cardSlot);
 
-            // Ajout: On déclenche l'événement GameEvents.OnCardSlotClicked quand le slot est cliqué.
             GetComponent<Collider>().gameObject.AddComponent<ClickHandler>().OnClick += () =>
             {
                 GameEvents.TriggerCardSlotClicked(this);
@@ -49,58 +40,27 @@ namespace com.hyminix.game.ojyx.Controllers
         {
             Debug.Log($"PlaceCard called on slot: {cardSlot.row}, {cardSlot.column}, occupied: {cardSlot.IsOccupied}");
 
-            if (newCardController.transform.parent != null && newCardController.transform.parent != transform)
+            // Détacher la nouvelle carte de son parent actuel (si elle en a un).
+            if (newCardController.transform.parent != null)
             {
-                Debug.Log("Détachement du nouveau CardController de son ancien parent.");
                 newCardController.transform.SetParent(null);
             }
 
-            if (cardSlot.IsOccupied)
+            // S'il y a déjà une carte, la défausser *AVANT* de mettre à jour le modèle.
+            if (cardSlot.IsOccupied && currentCardController != null)
             {
-                Debug.Log("PlaceCard: Slot is occupied, swapping cards.");
-                CardController oldCardController = currentCardController;
-                Debug.Log($"PlaceCard: Old CardController present: {oldCardController != null}, New: {newCardController != null}");
-
-                if (oldCardController != null && newCardController != null)
-                {
-                    // Déplacer l'ancienne carte vers la défausse
-                    GameManager.Instance.DeckController.DiscardCardWithAnimation(oldCardController, animationDuration, animationEase);
-
-                    // Mise à jour du modèle : retirer l'ancienne carte et placer la nouvelle
-                    cardSlot.RemoveCard();
-                    cardSlot.PlaceCard(newCardController.Card);
-                    cardSlotView.UpdateVisual();
-
-                    // Placer la nouvelle carte dans ce slot en tant qu'enfant
-                    newCardController.transform.SetParent(transform);
-                    newCardController.transform.DOLocalMove(new Vector3(0, 0.1f, 0), animationDuration)
-                        .SetEase(animationEase)
-                        .OnComplete(() =>
-                        {
-                            Debug.Log($"PlaceCard: New card {newCardController.Card.Data.value} placed in slot ({cardSlot.row}, {cardSlot.column}).");
-                            //SUPPRIMER OnCardPlaced?.Invoke(this);
-                        });
-                    newCardController.Card.SetPosition(cardSlot.row, cardSlot.column);
-                    currentCardController = newCardController;
-                }
-                else
-                {
-                    Debug.LogError("PlaceCard: oldCardController or newCardController is null!");
-                }
+                GameManager.Instance.DeckController.DiscardCardWithAnimation(currentCardController, animationDuration, animationEase);
             }
-            else
-            {
-                Debug.Log("CardSlotController.PlaceCard: Slot vide, placement simple.");
-                newCardController.transform.SetParent(transform);
-                newCardController.transform.DOLocalMove(new Vector3(0, 0.1f, 0), animationDuration)
-                    .SetEase(animationEase);
 
-                cardSlot.PlaceCard(newCardController.Card);
-                newCardController.Card.SetPosition(cardSlot.row, cardSlot.column);
-                cardSlotView.UpdateVisual();
-                //SUPPRIMER OnCardPlaced?.Invoke(this);
-                currentCardController = newCardController;
-            }
+            // Mettre à jour le modèle *APRÈS* avoir géré l'ancienne carte.
+            cardSlot.PlaceCard(newCardController.Card);
+            newCardController.Card.SetPosition(cardSlot.row, cardSlot.column); // Mettre à jour la position dans le modèle.
+
+            // Mettre à jour la vue.
+            currentCardController = newCardController;
+            newCardController.transform.SetParent(transform);
+            newCardController.transform.DOLocalMove(new Vector3(0, 0.1f, 0), animationDuration).SetEase(animationEase);
+            cardSlotView.UpdateVisual();
         }
 
 
@@ -114,10 +74,10 @@ namespace com.hyminix.game.ojyx.Controllers
             CardController removed = currentCardController;
             if (removed != null)
             {
+                // Détacher la carte *AVANT* de mettre à jour le modèle.
                 removed.transform.SetParent(null);
-                cardSlot.RemoveCard();
+                cardSlot.RemoveCard(); // Mettre à jour le modèle.
                 cardSlotView.UpdateVisual();
-                //SUPPRIMER OnCardRemoved?.Invoke(this);
                 currentCardController = null;
                 return removed;
             }
@@ -128,6 +88,5 @@ namespace com.hyminix.game.ojyx.Controllers
         {
             cardSlotView.SetHighlight(active);
         }
-
     }
 }

@@ -1,14 +1,12 @@
 // --- Controllers/CardController.cs ---
 using UnityEngine;
-//SUPPRIMER using UnityEngine.EventSystems;
 using DG.Tweening;
 using com.hyminix.game.ojyx.Views;
 using com.hyminix.game.ojyx.Models;
-using com.hyminix.game.ojyx.Managers;
 
 namespace com.hyminix.game.ojyx.Controllers
 {
-    public class CardController : MonoBehaviour //SUPPRIMER , IPointerClickHandler
+    public class CardController : MonoBehaviour
     {
         private CardView cardView;
         private Card card;
