@@ -1,8 +1,7 @@
-// --- Views/DiscardPileView.cs ---
 using UnityEngine;
 using Sirenix.OdinInspector;
-using com.hyminix.game.ojyx.Controllers;
 using com.hyminix.game.ojyx.Models;
+using com.hyminix.game.ojyx.Controllers;
 using System.Collections.Generic;
 
 namespace com.hyminix.game.ojyx.Views
@@ -16,7 +15,6 @@ namespace com.hyminix.game.ojyx.Views
                 [Title("Référence Modèle")]
                 [ReadOnly, SerializeField] public DiscardPile discardPileModel;
 
-                // Ajoute visuellement une carte au sommet de la pile
                 public void AddCardToDiscardPile(CardController cardController)
                 {
                         if (discardPileModel == null)
@@ -24,7 +22,6 @@ namespace com.hyminix.game.ojyx.Views
                                 Debug.LogError("DiscardPileView: discardPileModel n'est pas assigné !");
                                 return;
                         }
-
                         discardPileModel.AddCard(cardController.Card);
                         cardController.transform.SetParent(discardPileContainer);
                         int count = discardPileModel.cards.Count;
@@ -33,7 +30,6 @@ namespace com.hyminix.game.ojyx.Views
                         Debug.Log($"DiscardPileView: Ajout de la carte {cardController.Card.Data.value} en position {count} de la pile.");
                 }
 
-                // Retire la carte du dessus (modèle et vue)
                 public CardController DrawTopCardController()
                 {
                         if (discardPileModel == null)
@@ -46,7 +42,6 @@ namespace com.hyminix.game.ojyx.Views
                                 Debug.LogWarning("DiscardPileView: La défausse est vide !");
                                 return null;
                         }
-
                         Card topCard = discardPileModel.DrawCard();
                         CardController topCardController = GetTopCardController();
                         if (topCardController == null)
@@ -60,7 +55,6 @@ namespace com.hyminix.game.ojyx.Views
                         return topCardController;
                 }
 
-                // IMPORTANT : on rend cette méthode publique pour l'accès depuis les états
                 public CardController GetTopCardController()
                 {
                         int lastIndex = discardPileContainer.childCount - 1;

@@ -1,4 +1,3 @@
-// --- States/DrawChoiceState.cs ---
 using UnityEngine;
 using com.hyminix.game.ojyx.Controllers;
 using com.hyminix.game.ojyx.Managers;
@@ -26,16 +25,17 @@ namespace com.hyminix.game.ojyx.States
         {
             Debug.Log("DrawChoiceState.HandleCardClick: Clic détecté!");
 
-            // Si le clic concerne la carte du dessus de la pioche
-            if (deckController.deckCards.Count > 0 && cardController == deckController.deckCards[0])
+            // Vérifie si le clic concerne la carte du dessus du deck
+            CardController topDeckCard = deckController.DeckView.PeekTopCardController();
+            if (topDeckCard != null && cardController == topDeckCard)
             {
                 Debug.Log("DrawChoiceState.HandleCardClick: Clic sur la carte du dessus de la pioche.");
-                cardController.Flip();
+                cardController.Flip(); // On flip si besoin
                 gameManager.TransitionToState(new CardSelectedState(cardController));
                 return;
             }
 
-            // Si le clic concerne la carte du dessus de la défausse
+            // Vérifie si le clic concerne la carte du dessus de la défausse
             CardController topDiscardCard = deckController.discardPileView.GetTopCardController();
             if (topDiscardCard != null && cardController == topDiscardCard)
             {

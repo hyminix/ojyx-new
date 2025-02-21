@@ -19,7 +19,7 @@ namespace com.hyminix.game.ojyx.States
         public void EnterState(GameManager manager)
         {
             Debug.Log("CardSelectedState: EnterState");
-            selectedCard.transform.localScale = Vector3.one * 1.2f;
+            // selectedCard.transform.localScale = Vector3.one * 1.2f;
 
             foreach (var slot in manager.CurrentPlayer.PlayerBoardController.playerBoardView.cardSlots)
             {

@@ -149,8 +149,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd1db02feb46e9a429969fff0ab93d60, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  deckContainer: {fileID: 890986349}
+  offsetZ: 0.02
   cardPrefab: {fileID: 1964277560026972079, guid: 30baf4fafd6c6594c9c7f0b6f22e6d2e, type: 3}
-  deckPosition: {fileID: 890986349}
 --- !u!114 &373281788
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -702,8 +703,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: df13811d9f921c34493331500c8f6ea5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cardSlotPrefab: {fileID: 74023824471274015, guid: f5b813b1bdd351f49aceeff6a6a2ad60, type: 3}
-  discardCenter: {fileID: 840560937}
+  discardPileContainer: {fileID: 840560937}
+  offsetZ: 0.02
 --- !u!1 &2075612249
 GameObject:
   m_ObjectHideFlags: 0
