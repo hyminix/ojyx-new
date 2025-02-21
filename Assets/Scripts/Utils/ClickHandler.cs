@@ -4,11 +4,9 @@ using UnityEngine.EventSystems;
 using com.hyminix.game.ojyx.Controllers;
 using com.hyminix.game.ojyx.Managers;
 using com.hyminix.game.ojyx.Enums;
-
 public class ClickHandler : MonoBehaviour, IPointerClickHandler
 {
     private CardSlotController cardSlotController;
-
     private void Awake()
     {
         cardSlotController = GetComponentInParent<CardSlotController>();
@@ -17,7 +15,6 @@ public class ClickHandler : MonoBehaviour, IPointerClickHandler
             Debug.LogError("ClickHandler: CardSlotController not found!");
         }
     }
-
     public void OnPointerClick(PointerEventData eventData)
     {
         if (cardSlotController != null)
