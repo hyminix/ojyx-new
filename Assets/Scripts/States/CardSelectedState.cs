@@ -1,4 +1,4 @@
-// --- States/CardSelectedState.cs ---
+// --- States/CardSelectedState.cs --- (Utilisation de la méthode DiscardCard du DeckController)
 using UnityEngine;
 using com.hyminix.game.ojyx.Controllers;
 using com.hyminix.game.ojyx.Managers;
@@ -10,7 +10,7 @@ namespace com.hyminix.game.ojyx.States
     public class CardSelectedState : IGameState
     {
         public CardController selectedCard; // Carte sélectionnée
-        private bool drawnFromDiscard;     // Vrai si la carte provient de la défausse
+        private bool drawnFromDiscard;    // Vrai si la carte provient de la défausse
 
         // Ajout du paramètre drawnFromDiscard (par défaut false)
         public CardSelectedState(CardController cardController, bool drawnFromDiscard = false)
@@ -66,7 +66,8 @@ namespace com.hyminix.game.ojyx.States
                     if (drawnFromDiscard)
                     {
                         // Annulation : remettre la carte dans la défausse et retourner à DrawChoiceState
-                        manager.DeckController.discardPileView.AddCardToDiscardPile(selectedCard);
+                        // MODIFICATION : Utilisation de la méthode DiscardCard du DeckController
+                        manager.DeckController.DiscardCard(selectedCard.Card);
                         manager.TransitionToState(new DrawChoiceState());
                     }
                     else
@@ -78,7 +79,6 @@ namespace com.hyminix.game.ojyx.States
                     break;
             }
         }
-
         public PlayerAction? GetActionForCardSlotClick(GameManager manager)
         {
             return PlayerAction.PlaceCard;

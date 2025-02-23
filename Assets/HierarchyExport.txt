@@ -1,0 +1,904 @@
+Main Camera
+  - Transform
+  - Camera
+  - AudioListener
+  - PhysicsRaycaster
+  - UniversalAdditionalCameraData
+Directional Light
+  - Transform
+  - Light
+EventSystem
+  - Transform
+  - EventSystem
+  - InputSystemUIInputModule
+GameManager
+  - Transform
+  - GameManager
+Deck
+  - Transform
+  - DeckController
+  - DeckView
+  - DeckClickHandler
+  - BoxCollider
+--DeckPosition
+    - Transform
+DiscardPile
+  - Transform
+  - DiscardPileView
+  - DiscardPileClickHandler
+  - BoxCollider
+--DiscardCenter
+    - Transform
+ActivePlayerBoardPosition
+  - Transform
+UIManager
+  - Transform
+  - UIManager
+UICanvas
+  - RectTransform
+  - Canvas
+  - CanvasScaler
+  - GraphicRaycaster
+--FadeImage
+    - RectTransform
+    - CanvasRenderer
+    - Image
+    - CanvasGroup
+--PlayerTurnText
+    - RectTransform
+    - CanvasRenderer
+    - TextMeshProUGUI
+--StateText
+    - RectTransform
+    - CanvasRenderer
+    - TextMeshProUGUI
+--InfoText
+    - RectTransform
+    - CanvasRenderer
+    - TextMeshProUGUI
+--GlobalViewPanel
+    - RectTransform
+    - CanvasRenderer
+    - Image
+    - GlobalUIManager
+----PlayerViewContainer
+      - RectTransform
+--Vue Global Button
+    - RectTransform
+    - CanvasRenderer
+    - Image
+    - Button
+----Text (TMP)
+      - RectTransform
+      - CanvasRenderer
+      - TextMeshProUGUI
+PostProcessingVolume
+  - Transform
+  - Volume
+ExportHierarchie
+  - Transform
+  - ExportHierarchyWithComponents
+Player(Clone)
+  - Transform
+  - PlayerController
+  - PlayerBoardView
+  - PlayerBoardController
+--BoardCenter
+    - Transform
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+Player(Clone)
+  - Transform
+  - PlayerController
+  - PlayerBoardView
+  - PlayerBoardController
+--BoardCenter
+    - Transform
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+Player(Clone)
+  - Transform
+  - PlayerController
+  - PlayerBoardView
+  - PlayerBoardController
+--BoardCenter
+    - Transform
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+Player(Clone)
+  - Transform
+  - PlayerController
+  - PlayerBoardView
+  - PlayerBoardController
+--BoardCenter
+    - Transform
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+Player(Clone)
+  - Transform
+  - PlayerController
+  - PlayerBoardView
+  - PlayerBoardController
+--BoardCenter
+    - Transform
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+Player(Clone)
+  - Transform
+  - PlayerController
+  - PlayerBoardView
+  - PlayerBoardController
+--BoardCenter
+    - Transform
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+Player(Clone)
+  - Transform
+  - PlayerController
+  - PlayerBoardView
+  - PlayerBoardController
+--BoardCenter
+    - Transform
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+Player(Clone)
+  - Transform
+  - PlayerController
+  - PlayerBoardView
+  - PlayerBoardController
+--BoardCenter
+    - Transform
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler
+--cardSlot(Clone)
+    - Transform
+    - MeshFilter
+    - MeshRenderer
+    - BoxCollider
+    - CardSlotView
+    - CardSlotController
+    - ClickHandler

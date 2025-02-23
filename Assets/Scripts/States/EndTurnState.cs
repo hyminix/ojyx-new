@@ -118,6 +118,12 @@ namespace com.hyminix.game.ojyx.States
 
         }
 
+
+        public PlayerAction? GetActionForCardSlotClick(GameManager manager, CardSlotController cardSlotController)
+        {
+            throw new System.NotImplementedException();
+        }
+
         public PlayerAction? GetActionForCardSlotClick(GameManager manager)
         {
             throw new System.NotImplementedException();

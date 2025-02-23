@@ -1,4 +1,4 @@
-// --- Controllers/CardSlotController.cs --- (Simplification: plus besoin de s'abonner au ClickHandler)
+// --- Controllers/CardSlotController.cs --- (Pas de changements majeurs pour l'instant)
 using UnityEngine;
 using DG.Tweening;
 using com.hyminix.game.ojyx.Models;
@@ -30,31 +30,27 @@ namespace com.hyminix.game.ojyx.Controllers
             }
             cardSlotView.Initialize(cardSlot);
 
-            // SIMPLIFICATION : On ajoute le ClickHandler, c'est tout.
             GetComponent<Collider>().gameObject.AddComponent<ClickHandler>();
         }
+
 
         public void PlaceCard(CardController newCardController)
         {
             Debug.Log($"PlaceCard called on slot: {cardSlot.row}, {cardSlot.column}, occupied: {cardSlot.IsOccupied}");
 
-            // Détacher la nouvelle carte de son parent actuel (si elle en a un).
             if (newCardController.transform.parent != null)
             {
                 newCardController.transform.SetParent(null);
             }
 
-            // S'il y a déjà une carte, la défausser *AVANT* de mettre à jour le modèle.
             if (cardSlot.IsOccupied && currentCardController != null)
             {
                 GameManager.Instance.DeckController.DiscardCardWithAnimation(currentCardController, animationDuration, animationEase);
             }
 
-            // Mettre à jour le modèle *APRÈS* avoir géré l'ancienne carte.
             cardSlot.PlaceCard(newCardController.Card);
             newCardController.Card.SetPosition(cardSlot.row, cardSlot.column); // Mettre à jour la position dans le modèle.
 
-            // Mettre à jour la vue.
             currentCardController = newCardController;
             newCardController.transform.SetParent(transform);
             newCardController.transform.DOLocalMove(new Vector3(0, 0.1f, 0), animationDuration).SetEase(animationEase);
@@ -72,7 +68,6 @@ namespace com.hyminix.game.ojyx.Controllers
             CardController removed = currentCardController;
             if (removed != null)
             {
-                // Détacher la carte *AVANT* de mettre à jour le modèle.
                 removed.transform.SetParent(null);
                 cardSlot.RemoveCard(); // Mettre à jour le modèle.
                 cardSlotView.UpdateVisual();

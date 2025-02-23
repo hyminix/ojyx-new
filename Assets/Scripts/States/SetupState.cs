@@ -16,7 +16,7 @@ namespace com.hyminix.game.ojyx.States
             foreach (var playerController in manager.players)
             {
                 playerController.Initialize(playerController.playerID);
-                playerController.DistributeInitialCards(manager.DeckController); // Distribue les cartes
+                playerController.DistributeInitialCards(); // Distribue les cartes
             }
             manager.TransitionToState(new DiscardFirstCardState()); //On passe a la selection des deux cartes
         }

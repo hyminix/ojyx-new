@@ -1,0 +1,90 @@
+// --- PlayerView.cs --- (Nouveau script pour gérer l'affichage d'un joueur dans la vue globale)
+
+using UnityEngine;
+using TMPro; // Si tu utilises TextMeshPro
+using com.hyminix.game.ojyx.Controllers;
+using com.hyminix.game.ojyx.Models;
+using System.Collections.Generic;
+
+public class PlayerView : MonoBehaviour
+{
+    [SerializeField] private TextMeshProUGUI playerNameText; // Affiche le nom/numéro du joueur.
+    [SerializeField] private TextMeshProUGUI playerScoreText; // Affiche le score du joueur.
+    [SerializeField] private GameObject activeIndicator; // Un indicateur visuel (peut être un halo, une bordure, etc.) pour montrer si le joueur est actif.
+    [SerializeField] private Transform cardContainer; // L'objet *parent* où les CardPlaceholder seront instanciés.  Devrait avoir un GridLayoutGroup.
+    [SerializeField] private GameObject cardPlaceholderPrefab; // Le prefab pour représenter une carte.
+
+    private List<CardPlaceholderView> cardPlaceholders = new List<CardPlaceholderView>();
+    private PlayerController playerController; // Référence au PlayerController.
+
+    // Initialisation de la vue du joueur.  Appelée par GlobalUIManager.
+    public void Initialize(PlayerController playerController)
+    {
+        this.playerController = playerController;
+
+        if (playerNameText != null)
+        {
+            playerNameText.text = "Joueur " + playerController.playerID;
+        }
+
+        //On affiche pas le score pour l'instant
+        //if (playerScoreText != null)
+        //{
+        //    playerScoreText.text = "Score: " + playerController.Player.CalculateInitialScore(); // Ou CalculateScore() plus tard.
+        //}
+
+        // Crée/met à jour les placeholders pour les cartes.
+        UpdateCards();
+    }
+
+    // Met à jour l'affichage des cartes.
+    private void UpdateCards()
+    {
+        // Assurez-vous que le bon nombre de placeholders est créé.
+        int numCards = playerController.PlayerBoardController.columns * playerController.PlayerBoardController.rows;
+
+        // Création des placeholders manquants
+        while (cardPlaceholders.Count < numCards)
+        {
+            GameObject cardPlaceholderGO = Instantiate(cardPlaceholderPrefab, cardContainer);
+            cardPlaceholders.Add(cardPlaceholderGO.GetComponent<CardPlaceholderView>());
+        }
+
+        //Désactivation des placeholder en trop
+        for (int i = 0; i < cardPlaceholders.Count; i++)
+        {
+            cardPlaceholders[i].gameObject.SetActive(i < numCards);
+        }
+
+        // Mise à jour des placeholders existants avec les données des cartes.
+        //On boucle sur tous les slots du player
+        int cardIndex = 0;
+        foreach (CardSlot slot in playerController.PlayerBoardController.PlayerBoard.cardSlots)
+        {
+            if (cardIndex < cardPlaceholders.Count) //Securité
+            {
+                if (slot.IsOccupied)
+                {
+                    //Si il y a une carte, ont affiche sa valeur et ça couleur
+                    cardPlaceholders[cardIndex].SetCard(slot.card);
+                }
+                else
+                {
+                    //Sinon ont affiche une carte vide
+                    cardPlaceholders[cardIndex].SetEmpty();
+                }
+            }
+            cardIndex++;
+        }
+    }
+
+
+    // Met à jour l'affichage de l'indicateur actif/inactif.
+    public void SetActive(bool isActive)
+    {
+        if (activeIndicator != null)
+        {
+            activeIndicator.SetActive(isActive);
+        }
+    }
+}

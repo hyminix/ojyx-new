@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 7494300652324267284}
   - component: {fileID: 740799624597167364}
   - component: {fileID: 2428427947599255340}
-  - component: {fileID: 9188616675772564545}
+  - component: {fileID: 2775573205048873251}
   m_Layer: 0
   m_Name: Card
   m_TagString: Untagged
@@ -125,7 +125,7 @@ MonoBehaviour:
   cardRenderer: {fileID: 7494300652324267284}
   frontMaterial: {fileID: 2100000, guid: 27f529a222ca801408bfe2fd746f83cd, type: 2}
   backMaterial: {fileID: 2100000, guid: b453555d636844844bfea570f67766c6, type: 2}
---- !u!114 &9188616675772564545
+--- !u!114 &2775573205048873251
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -137,7 +137,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6e351660b956d584589e6ca5999eeb4c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hoverHeight: 0.5
-  slotLayerMask:
-    serializedVersion: 2
-    m_Bits: 64

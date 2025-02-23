@@ -1,4 +1,4 @@
-// --- States/DrawChoiceState.cs ---
+// --- States/DrawChoiceState.cs --- (Utilisation des méthodes du DeckController)
 using UnityEngine;
 using com.hyminix.game.ojyx.Controllers;
 using com.hyminix.game.ojyx.Managers;
@@ -9,7 +9,7 @@ namespace com.hyminix.game.ojyx.States
 {
     public class DrawChoiceState : IGameState
     {
-        private DeckController deckController;
+        private DeckController deckController; // Gardé pour DrawFromDeck ET DrawFromDiscardPile
         private GameManager gameManager;
 
         public void EnterState(GameManager manager)
@@ -50,6 +50,7 @@ namespace com.hyminix.game.ojyx.States
                     }
                     break;
                 case PlayerAction.DrawFromDiscard:
+                    // MODIFICATION : Utilisation de la méthode du DeckController
                     CardController drawnCardDiscard = manager.DeckController.DrawFromDiscardPile();
                     if (drawnCardDiscard != null)
                     {
@@ -63,10 +64,9 @@ namespace com.hyminix.game.ojyx.States
                     break;
             }
         }
-
         public PlayerAction? GetActionForCardSlotClick(GameManager manager)
         {
-            throw new System.NotImplementedException();
+            return null;
         }
     }
 }

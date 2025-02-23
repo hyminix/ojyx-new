@@ -1,0 +1,80 @@
+//GlobalUIManager.cs
+using System.Collections.Generic;
+using UnityEngine;
+using com.hyminix.game.ojyx.Managers;
+using com.hyminix.game.ojyx.Controllers;
+
+public class GlobalUIManager : MonoBehaviour
+{
+    [SerializeField] private GameObject playerViewPrefab; // Le prefab de la vue d'un joueur.
+    [SerializeField] private Transform playerViewContainer; // Le conteneur où instancier les PlayerViews. Ce sera probablement un enfant de GlobalViewPanel, avec un Layout Group.
+    //Tu pourrais aussi serialize un Deck et discard Image si tu veux les rendres cliquable
+
+    private List<PlayerView> playerViews = new List<PlayerView>(); // Garde une trace des PlayerView instanciés.
+
+    // Appelé quand la vue globale est affichée.
+    public void UpdateGlobalView()
+    {
+        // 1. Détruire les anciens PlayerView (s'il y en a).
+        ClearPlayerViews();
+        // 2. Instancier les nouveaux PlayerView.
+        int numPlayers = GameManager.Instance.players.Count;
+        for (int i = 0; i < numPlayers; i++)
+        {
+            GameObject playerViewGO = Instantiate(playerViewPrefab, playerViewContainer);
+            PlayerView playerView = playerViewGO.GetComponent<PlayerView>();
+
+            // Calculer l'index du joueur *affiché* dans cette vue, *avant* d'appeler Initialize.
+            int playerIndex = (GameManager.Instance.currentPlayerIndex + i) % numPlayers;
+            //Initialisation du player view avec le bonne index
+            playerView.Initialize(GameManager.Instance.players[playerIndex]);
+
+            //Rotation des object en fonction de la position, après l'initialisation
+            UpdatePlayerViewRotation(playerViewGO, numPlayers, i);
+            playerViews.Add(playerView);
+
+        }
+    }
+
+    private void ClearPlayerViews()
+    {
+        foreach (var playerView in playerViews)
+        {
+            Destroy(playerView.gameObject);
+        }
+        playerViews.Clear();
+    }
+
+    //Fonction pour faire la rotation des objets en fonction de leur place dans la vue
+    private void UpdatePlayerViewRotation(GameObject playerViewGameObject, int numPlayers, int index)
+    {
+        float rotationAngle = 0f;
+
+        // Définir l'angle de rotation en fonction du nombre de joueurs et de l'index
+        switch (numPlayers)
+        {
+            case 1:
+                // Pas de rotation nécessaire
+                break;
+            case 2:
+                rotationAngle = index * 180f;
+                break;
+            case 3:
+                if (index == 1)
+                {
+                    rotationAngle = 90f;
+                }
+                else if (index == 2)
+                {
+                    rotationAngle = -90f;
+                }
+                break;
+            case 4:
+                rotationAngle = index * 90f; // Rotation de 90 degrés pour chaque joueur
+                break;
+                //Pour le moment ont fait que 1 a 4 joueurs
+        }
+        // Appliquer la rotation
+        playerViewGameObject.transform.rotation = Quaternion.Euler(0, 0, rotationAngle);
+    }
+}

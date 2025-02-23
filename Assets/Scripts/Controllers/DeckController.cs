@@ -1,4 +1,4 @@
-// --- Controllers/DeckController.cs --- (Léger ajustement dans DiscardCardWithAnimation)
+// --- Controllers/DeckController.cs --- (Suppression de deckPosition, utilisation de DeckView pour le visuel)
 using System.Collections.Generic;
 using UnityEngine;
 using Sirenix.OdinInspector;
@@ -14,16 +14,16 @@ namespace com.hyminix.game.ojyx.Controllers
         [SerializeField] private List<CardData> cardTemplates;
         [Title("Prefabs & Positions")]
         public GameObject cardPrefab;
-        public Transform deckPosition; // Gardé pour l'instant, mais pourrait être supprimé si DeckView gère le DrawFromDeck
+
         [Title("Composants")]
         [SerializeField, ReadOnly] private Deck deck;
-        [SerializeField, ReadOnly] private DeckView deckView;
+        [SerializeField, ReadOnly] private DeckView deckView; //DeckView au lieu de Transform
         [SerializeField, ReadOnly] private DiscardPile discardPile;
         public DiscardPile DiscardPile => discardPile;
         [SerializeField] public DiscardPileView discardPileView;
         public delegate void CardDrawAction(Card card);
         public static event CardDrawAction OnCardDrawnFromDeck;
-        public static event CardDrawAction OnCardDrawnFromDiscard; // Pas utilisé pour l'instant, mais peut être utile
+        public static event CardDrawAction OnCardDrawnFromDiscard;
         public DeckView DeckView
         {
             get { return deckView; }
@@ -58,7 +58,7 @@ namespace com.hyminix.game.ojyx.Controllers
                 Debug.LogWarning("Deck vide !");
                 return null;
             }
-            // Pas besoin d'appeler deckModel.DrawCard() ici, c'est déjà fait dans RemoveTopCardController.
+
             OnCardDrawnFromDeck?.Invoke(topCardController.Card);
             return topCardController;
         }
@@ -70,7 +70,7 @@ namespace com.hyminix.game.ojyx.Controllers
                 Debug.LogWarning("Impossible de piocher depuis la défausse (vide).");
                 return null;
             }
-            // Pas besoin d'appeler discardPile.DrawCard() ici, c'est déjà fait dans DrawTopCardController.
+
             OnCardDrawnFromDiscard?.Invoke(topCardController.Card);
             return topCardController;
         }
@@ -86,12 +86,12 @@ namespace com.hyminix.game.ojyx.Controllers
         {
             if (cardController == null) return;
             Debug.Log("Mouvement de la carte (DiscardCardWithAnimation)");
-            // Ajout : Retourner la carte si elle est face cachée.
+
             if (!cardController.Card.IsFaceUp)
             {
                 cardController.Flip();
             }
-            // MODIFICATION : OnComplete *avant* le DoMove, pour éviter la course critique.
+
             cardController.transform.DOMove(discardPileView.transform.position, duration)
               .SetEase(ease)
               .OnComplete(() =>
