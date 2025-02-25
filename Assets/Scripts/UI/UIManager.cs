@@ -1,10 +1,10 @@
-// --- UIManager.cs ---
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using DG.Tweening;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
+using com.hyminix.game.ojyx.Managers;
 
 public class UIManager : MonoBehaviour
 {
@@ -19,42 +19,59 @@ public class UIManager : MonoBehaviour
     [Header("Global View")]
     [SerializeField] private GameObject globalViewPanel;
     [SerializeField] private Volume postProcessingVolume;
-    private Bloom bloom;
+
+    private Bloom bloom; // si tu veux intensifier le bloom
+    private DepthOfField depthOfField; // si tu veux un flou DOF
+
+    private bool isGlobalViewOpen = false;
 
     private void Start()
     {
-        //DOTween
+        // DOTween init
         DOTween.Init(true, true, LogBehaviour.Verbose).SetCapacity(200, 50);
 
+        // Config fadeImage
         if (fadeImage != null)
         {
             fadeImage.gameObject.SetActive(true);
-            // Ajoute un CanvasGroup si absent, et le configure
             CanvasGroup canvasGroup = fadeImage.GetComponent<CanvasGroup>();
-            if (canvasGroup == null)
-            {
-                canvasGroup = fadeImage.gameObject.AddComponent<CanvasGroup>();
-            }
-            canvasGroup.alpha = 0f; // Complètement transparent au départ
-            canvasGroup.blocksRaycasts = false; //Permet au fade image de ne pas bloquer les clics
-            //On desactive le raycast target de l'image
+            if (canvasGroup == null) canvasGroup = fadeImage.gameObject.AddComponent<CanvasGroup>();
+            canvasGroup.alpha = 0f;
+            canvasGroup.blocksRaycasts = false;
             fadeImage.raycastTarget = false;
         }
 
+        // Désactiver la vue globale par défaut
         if (globalViewPanel != null)
         {
             globalViewPanel.SetActive(false);
         }
 
+        // Récupère Bloom ou DepthOfField
         if (postProcessingVolume != null)
         {
             if (postProcessingVolume.profile.TryGet<Bloom>(out bloom))
             {
+                bloom.intensity.value = 0f;
             }
-            else
+            if (postProcessingVolume.profile.TryGet<DepthOfField>(out depthOfField))
             {
-                Debug.LogError("Bloom effect not found in the Volume Profile!");
+                depthOfField.active = false;
             }
+        }
+    }
+
+    private void Update()
+    {
+        // Gestion du scroll molette
+        float scroll = Input.GetAxis("Mouse ScrollWheel");
+        if (!isGlobalViewOpen && scroll < 0f)
+        {
+            ShowGlobalViewWithTransition();
+        }
+        else if (isGlobalViewOpen && scroll > 0f)
+        {
+            HideGlobalViewWithTransition();
         }
     }
 
@@ -82,18 +99,16 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    // *** Utilisation de CanvasGroup.DOFade ***
+    // Fonctions de fade
     public void FadeIn(float duration)
     {
         if (fadeImage != null)
         {
-            //On récupére le canvas group et on fait l'appel
             CanvasGroup canvasGroup = fadeImage.GetComponent<CanvasGroup>();
             if (canvasGroup != null)
             {
-                canvasGroup.DOFade(0f, duration); //Fondu vers transparent
+                canvasGroup.DOFade(0f, duration); // Vers transparent
             }
-
         }
     }
 
@@ -101,27 +116,52 @@ public class UIManager : MonoBehaviour
     {
         if (fadeImage != null)
         {
-            //On récupére le canvas group et on fait l'appel
             CanvasGroup canvasGroup = fadeImage.GetComponent<CanvasGroup>();
             if (canvasGroup != null)
             {
-                canvasGroup.DOFade(1f, duration); //Fondu vers opaque
+                canvasGroup.DOFade(1f, duration); // Vers opaque
             }
         }
     }
+
+    // Active ou désactive un flou stylisé (Bloom / DOF)
     private void BlurBackground(bool enable)
     {
+        // Si tu veux booster le Bloom
         if (bloom != null)
         {
-            bloom.intensity.value = enable ? 1f : 0f;  // Contrôle l'intensité du Bloom
+            bloom.intensity.value = enable ? 10f : 0f;
+        }
+        // Ou activer le DepthOfField
+        if (depthOfField != null)
+        {
+            depthOfField.active = enable;
         }
     }
-    public void SetColor(Color color)
+
+    public void ShowGlobalViewWithTransition()
     {
-        if (fadeImage != null)
+        isGlobalViewOpen = true;
+
+        // FadeOut, puis on active la vue globale, puis FadeIn
+        FadeOut(0.3f);
+        DOVirtual.DelayedCall(0.3f, () =>
         {
-            fadeImage.color = color;
-        }
+            ShowGlobalView();
+            FadeIn(0.3f);
+        });
+    }
+
+    public void HideGlobalViewWithTransition()
+    {
+        isGlobalViewOpen = false;
+
+        FadeOut(0.3f);
+        DOVirtual.DelayedCall(0.3f, () =>
+        {
+            HideGlobalView();
+            FadeIn(0.3f);
+        });
     }
 
     public void ShowGlobalView()
@@ -130,6 +170,13 @@ public class UIManager : MonoBehaviour
         {
             globalViewPanel.SetActive(true);
             BlurBackground(true);
+
+            // Petit fade-in du panel
+            CanvasGroup cg = globalViewPanel.GetComponent<CanvasGroup>();
+            if (!cg) cg = globalViewPanel.AddComponent<CanvasGroup>();
+            cg.alpha = 0f;
+            cg.DOFade(1f, 0.5f).SetEase(Ease.OutQuad);
+
             globalViewPanel.GetComponent<GlobalUIManager>().UpdateGlobalView();
         }
     }
@@ -138,7 +185,15 @@ public class UIManager : MonoBehaviour
     {
         if (globalViewPanel != null)
         {
-            globalViewPanel.SetActive(false);
+            // On fade out le panel
+            CanvasGroup cg = globalViewPanel.GetComponent<CanvasGroup>();
+            if (!cg) cg = globalViewPanel.AddComponent<CanvasGroup>();
+            cg.DOFade(0f, 0.5f).SetEase(Ease.OutQuad)
+              .OnComplete(() =>
+              {
+                  globalViewPanel.SetActive(false);
+              });
+
             BlurBackground(false);
         }
     }

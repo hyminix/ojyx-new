@@ -63,15 +63,6 @@ UICanvas
     - GlobalUIManager
 ----PlayerViewContainer
       - RectTransform
---Vue Global Button
-    - RectTransform
-    - CanvasRenderer
-    - Image
-    - Button
-----Text (TMP)
-      - RectTransform
-      - CanvasRenderer
-      - TextMeshProUGUI
 PostProcessingVolume
   - Transform
   - Volume
