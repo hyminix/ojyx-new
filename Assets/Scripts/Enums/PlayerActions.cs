@@ -5,6 +5,9 @@ namespace com.hyminix.game.ojyx.Enums
     {
         DrawFromDeck,
         DrawFromDiscard,
+        DrawFromAction,
+        PlaceActionCard,
+        DiscardActionCard,
         PlaceCard,
         RevealCard,
         DiscardDrawnCard, // Défausser la carte piochée

@@ -5,7 +5,8 @@
         "Unity.RenderPipelines.Universal.Runtime",
         "Unity.TextMeshPro",
         "Unity.RenderPipelines.Core.Runtime",
-        "DOTween.Modules"
+        "DOTween.Modules",
+        "Obvious.Soap"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

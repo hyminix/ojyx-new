@@ -66,7 +66,6 @@ namespace com.hyminix.game.ojyx.States
 
                 slotController.CardController.Flip();
                 manager.CurrentPlayer.Player.revealedCardCount++;
-                manager.CurrentPlayer.PlayerBoardController.UpdateDebugInfo();
                 Debug.Log("RevealTwoCardsState: Carte révélée. Nombre total révélé pour le joueur : " + manager.CurrentPlayer.Player.revealedCardCount);
 
                 if (manager.CurrentPlayer.Player.revealedCardCount >= manager.CurrentPlayer.Player.maxRevealedCards)
@@ -79,6 +78,7 @@ namespace com.hyminix.game.ojyx.States
                     {
                         manager.DetermineFirstPlayer();
                         // *** Appel de ActivateCurrentPlayer AVANT la transition ***
+                        manager.PlayerPositionManager.UpdatePlayerPositions(manager.currentPlayerIndex, manager.players.Count);
                         manager.ActivateCurrentPlayer();
                         manager.TransitionToState(new PlayerTurnState());
                         return;

@@ -1,10 +1,11 @@
-// --- Controllers/PlayerController.cs --- (Ajout des couleurs des cartes)
-
+// --- Controllers/PlayerController.cs ---
+//Suppression de la mise à jour des informations de Debug
 using UnityEngine;
 using Sirenix.OdinInspector;
 using com.hyminix.game.ojyx.Models;
 using com.hyminix.game.ojyx.Managers;
 using System.Collections.Generic;
+using Obvious.Soap;
 
 namespace com.hyminix.game.ojyx.Controllers
 {
@@ -26,9 +27,6 @@ namespace com.hyminix.game.ojyx.Controllers
                 [ShowInInspector, ReadOnly]
                 public int InitialScore => player != null ? player.CalculateInitialScore() : 0;
 
-                [ShowInInspector, ReadOnly]
-                private List<string> boardCards = new List<string>();
-
                 public void Initialize(int id)
                 {
                         playerID = id;
@@ -40,6 +38,7 @@ namespace com.hyminix.game.ojyx.Controllers
                                 return;
                         }
                         playerBoardController.Initialize();
+
                 }
 
                 public void StartTurn()
@@ -79,7 +78,6 @@ namespace com.hyminix.game.ojyx.Controllers
                                         }
                                 }
                         }
-                        UpdateDebugInfo(); // Mis à jour ici !
                 }
 
                 public void RevealCard(CardController cardController)
@@ -87,33 +85,41 @@ namespace com.hyminix.game.ojyx.Controllers
                         if (player.RevealCard(cardController.Card))
                         {
                                 cardController.Flip();
-                                UpdateDebugInfo(); // Met à jour l'affichage après avoir révélé une carte
                         }
                 }
 
                 public void DiscardCard(CardController cardController)
                 {
                         GameManager.Instance.DeckController.DiscardCardWithAnimation(cardController, 0.5f, DG.Tweening.Ease.OutQuad);
-                        UpdateDebugInfo(); // Met à jour l'affichage après avoir défaussé
                 }
 
-                public void UpdateDebugInfo()
+                // Cette méthode force la mise à jour visuelle de toutes les cartes du joueur
+                public void RefreshCardsVisibility()
                 {
-                        if (playerBoardController != null && playerBoardController.PlayerBoard != null)
+                        if (playerBoardController == null || playerBoardController.playerBoardView == null)
+                                return;
+
+                        // Forcer la mise à jour de tous les slots de cartes
+                        foreach (var slotController in playerBoardController.playerBoardView.cardSlots)
                         {
-                                boardCards.Clear();
-                                foreach (var slot in playerBoardController.PlayerBoard.cardSlots)
+                                if (slotController != null && slotController.CardController != null)
                                 {
-                                        if (slot.IsOccupied)
-                                        {
-                                                boardCards.Add($"[{slot.row},{slot.column}] : {slot.card.Data.value} ({(slot.card.IsFaceUp ? "V" : "C")})");
-                                        }
-                                        else
-                                        {
-                                                boardCards.Add($"[{slot.row},{slot.column}] : Vide");
-                                        }
+                                        // Force la carte à se rafraîchir visuellement
+                                        slotController.CardController.gameObject.SetActive(false);
+                                        slotController.CardController.gameObject.SetActive(true);
+
+                                        // Mettre à jour le visuel de la carte
+                                        slotController.CardController.transform.localPosition = new Vector3(0, 0.1f, 0);
+
+                                        // Au lieu d'accéder directement à cardSlotView, utiliser la méthode SetHighlight
+                                        // pour forcer un rafraîchissement visuel
+                                        slotController.SetHighlight(false);
                                 }
                         }
+
+                        // Force une mise à jour du plateau lui-même
+                        playerBoardController.gameObject.SetActive(false);
+                        playerBoardController.gameObject.SetActive(true);
                 }
         }
 }

@@ -1,4 +1,4 @@
-// --- Managers/GameManager.cs --- (Ajout de ShowGlobalView)
+// --- Managers/GameManager.cs ---
 using System.Collections.Generic;
 using UnityEngine;
 using Sirenix.OdinInspector;
@@ -6,7 +6,6 @@ using com.hyminix.game.ojyx.Controllers;
 using com.hyminix.game.ojyx.States;
 using com.hyminix.game.ojyx.Enums;
 using DG.Tweening;
-using TMPro;
 
 namespace com.hyminix.game.ojyx.Managers
 {
@@ -17,7 +16,7 @@ namespace com.hyminix.game.ojyx.Managers
         [Title("Configuration du Jeu")]
         [SerializeField] private int numberOfPlayers = 2;
         [SerializeField] private GameObject playerPrefab;
-        [SerializeField] private Transform activePlayerBoardPosition;
+        // PLUS BESOIN de activePlayerBoardPosition
 
         [Title("Références et Managers")]
         [SerializeField, ReadOnly] private DeckController deckController;
@@ -25,6 +24,7 @@ namespace com.hyminix.game.ojyx.Managers
         public List<PlayerController> players = new List<PlayerController>();
         [SerializeField] private UIManager uiManager;
         public UIManager UIManager => uiManager;
+        public PlayerPositionManager PlayerPositionManager => playerPositionManager;
 
         [Title("État du Jeu")]
         [ReadOnly, ShowInInspector]
@@ -43,6 +43,9 @@ namespace com.hyminix.game.ojyx.Managers
         [Title("Transition Settings")]
         [SerializeField] private float fadeDuration = 0.5f;
         [SerializeField] private float delayBeforeFade = 1f;
+
+        // NOUVEAU : Référence au gestionnaire de positions des joueurs
+        [SerializeField] private PlayerPositionManager playerPositionManager;
 
         private void Awake()
         {
@@ -64,14 +67,23 @@ namespace com.hyminix.game.ojyx.Managers
                 }
             }
 
-            InstantiatePlayers();
-
+            //Initialisation des positions joueurs
+            playerPositionManager = FindObjectOfType<PlayerPositionManager>();
+            if (playerPositionManager == null)
+            {
+                GameObject playerPositionsGO = new GameObject("PlayerPositions");
+                playerPositionManager = playerPositionsGO.AddComponent<PlayerPositionManager>();
+                Debug.LogWarning("PlayerPositionManager créé automatiquement. Il est recommandé de l'ajouter manuellement à la scène.");
+            }
         }
 
         private void Start()
         {
             deckController.InitializeDeck();
+            InstantiatePlayers(); // On instancie *APRES* avoir initialisé le deck
+            playerPositionManager.UpdatePlayerPositions(currentPlayerIndex, numberOfPlayers);
             TransitionToState(new SetupState());
+
         }
         private void InstantiatePlayers()
         {
@@ -79,17 +91,18 @@ namespace com.hyminix.game.ojyx.Managers
 
             for (int i = 0; i < numberOfPlayers; i++)
             {
+                // Instancier les joueurs sans les attacher à un parent
                 GameObject playerGO = Instantiate(playerPrefab);
                 PlayerController pc = playerGO.GetComponent<PlayerController>();
                 pc.Initialize(i);
-
-                playerGO.transform.position = activePlayerBoardPosition.position;
-                playerGO.transform.SetParent(null);
-                playerGO.SetActive(i == 0);
-
                 players.Add(pc);
             }
-            // *** Mise à jour initiale des textes de l'UI ***
+
+            // Maintenant que tous les joueurs sont instanciés et ajoutés à la liste,
+            // positionner chaque joueur à sa position initiale
+            playerPositionManager.UpdatePlayerPositions(currentPlayerIndex, numberOfPlayers);
+
+            // Mise à jour initiale des textes de l'UI
             uiManager?.SetPlayerTurnText(CurrentPlayer.playerID);
         }
 
@@ -113,7 +126,7 @@ namespace com.hyminix.game.ojyx.Managers
             // *** Logique d'activation/désactivation et d'affichage du texte d'info en fonction de l'état de jeu***
             if (currentState is PlayerTurnState)
             {
-                ActivateCurrentPlayer();
+                ActivateCurrentPlayer(); // Toujours besoin d'activer/désactiver pour la caméra, etc.
                 uiManager?.SetInfoText(""); //On nettoie le texte d'information contextuel
             }
             else if (currentState is RevealTwoCardsState)
@@ -134,23 +147,55 @@ namespace com.hyminix.game.ojyx.Managers
             uiManager.FadeOut(fadeDuration);
             yield return new WaitForSeconds(fadeDuration);
 
-            CurrentPlayer.gameObject.SetActive(false);
+            // Changer l'index du joueur courant
             currentPlayerIndex = (currentPlayerIndex + 1) % players.Count;
-            Debug.Log("Passage au joueur suivant : " + CurrentPlayer.playerID);
+            Debug.Log($"Passage au joueur suivant: {currentPlayerIndex} (playerID: {CurrentPlayer.playerID})");
+
+            // Mettre à jour les positions
+            playerPositionManager.UpdatePlayerPositions(currentPlayerIndex, numberOfPlayers);
+
+            // Attendre que les positions soient appliquées
+            yield return new WaitForSeconds(0.1f);
+
+            // Deuxième mise à jour pour s'assurer que tout est bien positionné
+            playerPositionManager.UpdatePlayerPositions(currentPlayerIndex, numberOfPlayers);
+
+            // Activer le joueur courant
             ActivateCurrentPlayer();
+
+            // Attendre que tout soit stable
+            yield return new WaitForFixedUpdate();
+
 
             uiManager.FadeIn(fadeDuration);
         }
 
+        // Ajoutez cette méthode pour faciliter la calibration des offsets
+        [Button("Calibrer les positions des joueurs")]
+        public void CalibratePlayerPositions()
+        {
+            if (playerPositionManager != null)
+            {
+                // Cette méthode va appeler DetermineOptimalOffset() via la réflexion
+                System.Type type = playerPositionManager.GetType();
+                System.Reflection.MethodInfo method = type.GetMethod("DetermineOptimalOffset",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+                if (method != null)
+                {
+                    method.Invoke(playerPositionManager, null);
+                    Debug.Log("Calibration des offsets effectuée");
+                }
+                else
+                {
+                    Debug.LogError("Méthode DetermineOptimalOffset non trouvée");
+                }
+            }
+        }
         public void ActivateCurrentPlayer()
         {
-            foreach (var player in players)
-            {
-                player.gameObject.SetActive(false);
-            }
-            CurrentPlayer.gameObject.SetActive(true);
+            //Remplacer par l'appel de PlayerPositionManager
             uiManager?.SetPlayerTurnText(CurrentPlayer.playerID);
-            // *** Mise à jour du texte d'info DANS ActivateCurrentPlayer ***
             uiManager?.SetInfoText("Au tour de joueur " + CurrentPlayer.playerID);
         }
 
@@ -202,14 +247,18 @@ namespace com.hyminix.game.ojyx.Managers
             {
                 player.Initialize(player.playerID); // Réinitialise l'ID, le modèle Player, et le plateau.
                 player.DistributeInitialCards();    // Redistribue les cartes.
-                player.gameObject.SetActive(false);
             }
 
+            //On remet à jour les positions
             currentPlayerIndex = 0; // Remet le joueur courant à 0.
-            players[0].gameObject.SetActive(true); // Active le premier joueur
+
+            // Réappliquer les positions pour tous les joueurs
+            playerPositionManager.UpdatePlayerPositions(currentPlayerIndex, numberOfPlayers);
+
             TransitionToState(new SetupState());
             uiManager?.SetInfoText("Révélez deux cartes.");
         }
+
 
         [Button("Forcer Joueur Suivant")]
         public void ForceNextPlayer()
@@ -225,11 +274,11 @@ namespace com.hyminix.game.ojyx.Managers
             Debug.Log("Règles du Skyjo : ... (à compléter) ...");
         }
 
-        // Ajout: Méthode pour afficher la vue globale.  Appelée par le bouton "Vue Globale".
-        [Button("Afficher Vue Globale")] // Utile pour le debug avec Odin
-        public void ShowGlobalView()
+        // Ajoutez aussi cette méthode pour repositionner manuellement si nécessaire
+        [Button("Forcer repositionnement")]
+        public void ForcePlayerPositioning()
         {
-            uiManager.ShowGlobalView();
+            playerPositionManager.UpdatePlayerPositions(currentPlayerIndex, numberOfPlayers);
         }
     }
 }

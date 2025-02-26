@@ -39,7 +39,7 @@ namespace com.hyminix.game.ojyx.Controllers
 
             foreach (CardSlot modelSlot in playerBoard.cardSlots)
             {
-                Vector3 slotPos = playerBoardView.boardCenter.position + new Vector3(modelSlot.column * playerBoardView.slotSpacing.x, 0, -modelSlot.row * playerBoardView.slotSpacing.y);
+                Vector3 slotPos = transform.position + new Vector3(modelSlot.column * 2f, 0, -modelSlot.row * 2.5f); //Valeurs par défaut pour le moment.
                 GameObject slotObj = Instantiate(playerBoardView.cardSlotPrefab, slotPos, Quaternion.identity, transform);
                 CardSlotController slotController = slotObj.GetComponent<CardSlotController>();
                 if (slotController == null)
@@ -141,14 +141,9 @@ namespace com.hyminix.game.ojyx.Controllers
                 }
             }
 
-            UpdateDebugInfo(); // Mettre à jour l'affichage Odin *après* toutes les modifications.
         }
 
 
-        //Appel de la fonction du PlayerController pour mettre a jour les informations de debug
-        public void UpdateDebugInfo()
-        {
-            GetComponentInParent<PlayerController>().UpdateDebugInfo();
-        }
+
     }
 }
